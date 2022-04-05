@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
 import urllib.request
 import json
 import os
 import sys
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
+from fractions import Fraction
+from dataclasses import dataclass
 
 
 # curl
@@ -22,19 +25,70 @@ def rest_request(
     return json.load(resp)
 
 
-def get_time_reports(
+def get_time_entries(
     account_id: str, access_token: str, from_date: int, to_date: int
-) -> None:
+) -> List[Dict[str, Any]]:
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Harvest-Account-id": account_id,
         "User-Agent": "Numtide invoice generator",
     }
-    resp = rest_request(
-        f"https://api.harvestapp.com/v2/reports/time/clients?from={from_date}&to={to_date}",
-        headers=headers,
+    url = f"https://api.harvestapp.com/v2/time_entries?from={from_date}&to={to_date}"
+    entries = []
+    while url is not None:
+        resp = rest_request(
+            url,
+            headers=headers,
+        )
+        entries.extend(resp["time_entries"])
+        url = resp["links"]["next"]
+    return entries
+
+
+@dataclass
+class Project:
+    # Use fractions here to avoid rounding errors, round to cents once on export
+    rounded_hours: Fraction = Fraction(0)
+    original_cost: Fraction = Fraction(0)
+    original_currency: str = ""
+    converted_cost: Fraction = Fraction(0)
+    converted_currency: str = ""
+
+
+def round_cents(n: Fraction) -> float:
+    return float(round(n, 2))
+
+
+Aggregated = Dict[str, Dict[str, Project]]
+
+
+def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
+    by_user_and_project: Dict[str, Dict[str, Project]] = defaultdict(
+        lambda: defaultdict(lambda: Project())
     )
-    breakpoint()
+    for entry in entries:
+        client_name = entry["client"]["name"]
+        project = by_user_and_project[entry["user"]["name"]][client_name]
+        project.rounded_hours += Fraction(entry["rounded_hours"])
+        if project.original_currency == "":
+            project.original_currency = entry["client"]["currency"]
+        else:
+            msg = f"Currency of customer changed from {project.original_currency} to {entry['client']['currency']} within the billing period. This is not supported!"
+            assert project.original_currency == entry["client"]["currency"], msg
+        rate = entry["task_assignment"]["hourly_rate"]
+        if rate == 0:
+            print(
+                f"WARNING, hourly rate for {client_name}/{entry['task']['name']} is 0.0"
+            )
+        project.original_cost += Fraction(entry["rounded_hours"]) * Fraction(rate)
+    return by_user_and_project
+
+
+# curl -X POST https://api.transferwise.com/v3/quotes/ -H 'Content-type: application/json' -d '{   "sourceCurrency": "GBP",    "targetCurrency": "USD",    "sourceAmount": null,    "targetAmount": 110}' | jq
+
+
+def convert_currencies(aggregated: Aggregated) -> Aggregated:
+    return aggregated
 
 
 def main() -> None:
@@ -52,10 +106,17 @@ def main() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    get_time_reports(account_id, access_token, 20220101, 20220131)
+    entries = get_time_entries(account_id, access_token, 20220101, 20220131)
 
+    by_user_and_project = convert_currencies(aggregate_time_entries(entries))
 
-# curl -X POST https://api.transferwise.com/v3/quotes/ -H 'Content-type: application/json' -d '{   "sourceCurrency": "GBP",    "targetCurrency": "USD",    "sourceAmount": null,    "targetAmount": 110}' | jq
+    for user, projects in by_user_and_project.items():
+        print(f"{user}:")
+        for project_name, project in projects.items():
+            cost = round_cents(project.original_cost)
+            print(
+                f"  {project_name}: {float(project.rounded_hours)} / {cost} {project.original_currency}"
+            )
 
 
 # curl -X POST \                                                                                                                                                                                                                 ✘ 23|3 jfroche@marcel 18:26:47

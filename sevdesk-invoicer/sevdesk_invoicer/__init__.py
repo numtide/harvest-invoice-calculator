@@ -5,6 +5,7 @@ import argparse
 import os
 import sys
 import json
+from fractions import Fraction
 from datetime import datetime
 from typing import Dict, Any, List
 
@@ -40,13 +41,13 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
     customer = Customer.get_by_customer_number(client, "1000")
     items = []
     for project in projects:
+        price = float(round((Fraction(project["target_cost"]) / Fraction(project["rounded_hours"])), 2))
         items.append(LineItem(
             name=project["project"],
             unity=Unity.HOUR,
             tax=0,
-            # price per unit or in total?
             quantity=project["rounded_hours"],
-            price=project["target_cost"],
+            price=price,
         ))
     invoice = Invoice(
         status=InvoiceStatus.DRAFT,

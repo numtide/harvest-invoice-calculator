@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 from .transferwise import exchange_rate
 
+
 def convert_cost(project: "Project", target_currency: str) -> Fraction:
     rate = exchange_rate(project.currency, target_currency)
     numtide_rate = Fraction(0.8)
@@ -25,6 +26,7 @@ class Project:
 
     def converted_cost(self, currency: str) -> Fraction:
         return convert_cost(self, currency)
+
 
 Aggregated = Dict[str, Dict[str, Project]]
 

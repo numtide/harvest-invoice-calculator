@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.python3.pkgs.buildPythonApplication {
-  pname = "harvest-invoice-calculator";
+  pname = "harvest-exporter";
   version = "0.0.1";
   src = ./.;
 
@@ -11,7 +11,7 @@ pkgs.python3.pkgs.buildPythonApplication {
 
   doCheck = true;
   checkPhase = ''
-    mypy harvest_invoice_calculator
+    mypy harvest_exporter
     black --check .
   '';
 }

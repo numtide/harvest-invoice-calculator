@@ -5,6 +5,7 @@ from fractions import Fraction
 
 from .rest import http_request
 
+
 @functools.cache
 def exchange_rate(source: str, target: str) -> Fraction:
     data = dict(sourceCurrency=source, targetCurrency=target)

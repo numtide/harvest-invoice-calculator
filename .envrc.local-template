@@ -1,0 +1,3 @@
+# Create a personal access tokens at https://id.getharvest.com/developers
+export HARVEST_ACCOUNT_ID=<TODO>
+export HARVEST_BEARER_TOKEN=<TODO>

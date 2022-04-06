@@ -16,7 +16,10 @@ from dataclasses import dataclass
 
 
 def http_request(
-    url: str, method: str = "GET", headers={}, data: Optional[Dict[str, Any]] = None
+    url: str,
+    method: str = "GET",
+    headers: Dict[str, str] = {},
+    data: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
 
     body = None
@@ -128,6 +131,11 @@ def parse_args() -> argparse.Namespace:
         help="Get one from https://id.getharvest.com/developers",
     )
     parser.add_argument(
+        "--user",
+        type=str,
+        help="user to filter for",
+    )
+    parser.add_argument(
         "--start",
         type=int,
         help="Start date i.e. 20220101",
@@ -140,7 +148,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--month",
         type=int,
-        choices=range(1,13),
+        choices=range(1, 13),
         help="Month to generate report for (conflicts with `--start` and `--end`)",
     )
     parser.add_argument(
@@ -220,17 +228,18 @@ def print_json(by_user_and_project: Aggregated, currency: str) -> None:
     data = []
     for user, projects in by_user_and_project.items():
         for project_name, project in projects.items():
-            data.append(dict(
-                user=user,
-                project=project_name,
-                rounded_hours=float(project.rounded_hours),
-                source_cost=round_cents(project.cost),
-                source_currency=project.currency,
-                target_cost=round_cents(project.converted_cost(currency)),
-                target_currency=currency,
-            ))
+            data.append(
+                dict(
+                    user=user,
+                    project=project_name,
+                    rounded_hours=float(project.rounded_hours),
+                    source_cost=round_cents(project.cost),
+                    source_currency=project.currency,
+                    target_cost=round_cents(project.converted_cost(currency)),
+                    target_currency=currency,
+                )
+            )
     json.dump(data, sys.stdout, indent=4, sort_keys=True)
-
 
 
 def main() -> None:
@@ -240,6 +249,15 @@ def main() -> None:
     )
 
     by_user_and_project = aggregate_time_entries(entries)
+    if args.user:
+        for_user = by_user_and_project.get(args.user)
+        if not for_user:
+            print(
+                f"user {args.user} not found, found {' '.join(by_user_and_project.keys())}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        by_user_and_project = {args.user: for_user}
     if args.format == "humanreadable":
         print_humanreadable(by_user_and_project, args.currency)
     elif args.format == "csv":

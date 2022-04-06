@@ -253,7 +253,7 @@ def main() -> None:
         for_user = by_user_and_project.get(args.user)
         if not for_user:
             print(
-                f"user {args.user} not found, found {' '.join(by_user_and_project.keys())}",
+                f"user {args.user} not found in time range, found {', '.join(by_user_and_project.keys())}",
                 file=sys.stderr,
             )
             sys.exit(1)

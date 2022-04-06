@@ -3,10 +3,10 @@ import sys
 import os
 
 sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "sevdesk-invoicer")
 )
 
-from harvest_invoice_calculator.sevdesk import main  # NOQA
+from sevdesk_invoicer import main  # NOQA
 
 if __name__ == "__main__":
     main()

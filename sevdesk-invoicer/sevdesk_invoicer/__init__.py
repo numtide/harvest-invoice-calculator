@@ -64,12 +64,14 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
     start = datetime.strptime(projects[0]["start_date"], "%Y%m%d")
     end = datetime.strptime(projects[0]["end_date"], "%Y%m%d")
 
-    # f = '%Y-%m-%d'
-    # time = "start.strftime(f)}/{end.strftime(f)"
+    head_text = """
+    Terms of payment: Payment within 30 days from receipt of invoice without deductions.
+    """
     time = start.strftime("%Y-%m")
     invoice = Invoice(
         status=InvoiceStatus.DRAFT,
         header=f"Bill for {time}",
+        head_text=head_text,
         customer=customer,
         reference=None,
         tax_type=DocumentModelTaxType.NOTEU,

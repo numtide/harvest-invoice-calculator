@@ -19,13 +19,19 @@ def as_humanreadable(
     print(f"time: {start_date} -> {end_date}")
     for user, projects in by_user_and_project.items():
         print(f"{user}:")
+        currencies = {}
         for project_name, project in projects.items():
+            if project.currency != currency:
+                currencies[project.currency] = project.exchange_rate(currency)
             cost = round_cents(project.cost)
             converted_cost = round_cents(project.converted_cost(currency))
 
             print(
                 f"  {project_name}: {float(project.rounded_hours)}h, {cost} {project.currency} -> {converted_cost} {currency}"
             )
+        print("Exchange rates")
+        for source_currency, rate in currencies.items():
+            print(f"1 {source_currency} -> {float(rate)} {currency}")
 
 
 def as_csv(
@@ -41,6 +47,7 @@ def as_csv(
         "source_currency",
         "target_cost",
         "target_currency",
+        "exchange_rate"
     ]
 
     writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
@@ -58,6 +65,7 @@ def as_csv(
                     source_currency=project.currency,
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
+                    exchange_rate=float(project.exchange_rate(currency))
                 )
             )
 
@@ -79,6 +87,7 @@ def as_json(
                     source_currency=project.currency,
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
+                    exchange_rate=float(project.exchange_rate(currency))
                 )
             )
     json.dump(data, sys.stdout, indent=4, sort_keys=True)

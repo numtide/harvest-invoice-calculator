@@ -24,6 +24,9 @@ class Project:
     cost: Fraction = Fraction(0)
     currency: str = ""
 
+    def exchange_rate(self, currency: str) -> Fraction:
+        return exchange_rate(self.currency, currency)
+
     def converted_cost(self, currency: str) -> Fraction:
         return convert_cost(self, currency)
 

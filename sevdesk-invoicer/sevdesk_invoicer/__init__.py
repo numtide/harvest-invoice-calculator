@@ -48,17 +48,22 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
                 2,
             )
         )
+        text = None
+        if project['source_currency'] != project['target_currency']:
+            text = f"(1 {project['source_currency']} = {float(project['exchange_rate'])} {project['target_currency']})"
         items.append(
             LineItem(
                 name=project["project"],
                 unity=Unity.HOUR,
                 tax=0,
+                text=text,
                 quantity=project["rounded_hours"],
                 price=price,
             )
         )
     start = datetime.strptime(projects[0]["start_date"], "%Y%m%d")
     end = datetime.strptime(projects[0]["end_date"], "%Y%m%d")
+
     # f = '%Y-%m-%d'
     # time = "start.strftime(f)}/{end.strftime(f)"
     time = start.strftime("%Y-%m")

@@ -6,8 +6,8 @@ let
     src = pkgs.fetchFromGitHub {
       owner = "Mic92";
       repo = "SevDesk-Python-Client";
-      rev = "e599524ffcee7c37a4cc7219dfd9c06ae056b950";
-      sha256 = "sha256-OGI/e8W6PhfzAF6IlnVDO6O+k0mcLS/Ink+Nc0IxEsA=";
+      rev = "dba3fab846958423132420d5b6b175a4bff39912";
+      sha256 = "sha256-DrUnWIqV6kw/jwcfI8Zu5IKH4pIxQCVZv5IWNICcdPE=";
     };
     postPatch = ''
       sed -i -e 's/"^.*"/"*"/' pyproject.toml

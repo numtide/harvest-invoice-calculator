@@ -4,10 +4,10 @@ let
     pname = "SevDesk-Python-Client";
     version = "2022-04-06";
     src = pkgs.fetchFromGitHub {
-      owner = "HpLightcorner";
+      owner = "Mic92";
       repo = "SevDesk-Python-Client";
-      rev = "2347f5c1b8d4376640bacead08be2266a5221fbd";
-      sha256 = "sha256-i4IvTs67iZsTjcLbFElRktBMAWcbSll0F+QA8L0jYNY=";
+      rev = "e599524ffcee7c37a4cc7219dfd9c06ae056b950";
+      sha256 = "sha256-OGI/e8W6PhfzAF6IlnVDO6O+k0mcLS/Ink+Nc0IxEsA=";
     };
     postPatch = ''
       sed -i -e 's/"^.*"/"*"/' pyproject.toml

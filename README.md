@@ -9,7 +9,7 @@ Optional: generate invoice using Sevdesk
 
 Generate your personal access token in Harvest using [this page](https://id.getharvest.com/oauth2/access_tokens/new).
 
-```shell
+```console
 cp .envrc.local-template .envrc.local
 ```
 
@@ -19,25 +19,31 @@ Save your Account ID and your token in `.envrc.local`
 
 * Generate for the current month
 
-```shell
+```console
 harvest-exporter
 ```
 
 * Generate for march:
 
-```shell
+```console
 harvest-exporter --month 3
+```
+
+* Filter by user
+
+```console
+harvest-exporter --user "Jörg Thalheim"
 ```
 
 * Generate using json output
 
-```shell
+```console
 harvest-exporter --format json
 ```
 
 * Generate using other currency
 
-```shell
+```console
 harvest-exporter --currency CHF
 ```
 

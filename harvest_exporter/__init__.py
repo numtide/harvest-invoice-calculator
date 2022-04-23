@@ -40,17 +40,20 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
     )
     for entry in entries:
         client_name = entry["client"]["name"]
+        rate = entry["task_assignment"]["hourly_rate"]
+        if rate == 0 or rate is None:
+            print(
+                f"WARNING, hourly rate for {client_name}/{entry['task']['name']} is 0.0, skip for export"
+            )
+            continue
+
         project = by_user_and_project[entry["user"]["name"]][client_name]
-        project.rounded_hours += Fraction(entry["rounded_hours"])
+        rounded_hours = Fraction(entry["rounded_hours"])
+        project.rounded_hours += rounded_hours
         if project.currency == "":
             project.currency = entry["client"]["currency"]
         else:
             msg = f"Currency of customer changed from {project.currency} to {entry['client']['currency']} within the billing period. This is not supported!"
             assert project.currency == entry["client"]["currency"], msg
-        rate = entry["task_assignment"]["hourly_rate"]
-        if rate == 0:
-            print(
-                f"WARNING, hourly rate for {client_name}/{entry['task']['name']} is 0.0"
-            )
-        project.cost += Fraction(entry["rounded_hours"]) * Fraction(rate)
+        project.cost += rounded_hours * Fraction(rate)
     return by_user_and_project

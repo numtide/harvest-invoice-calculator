@@ -48,10 +48,16 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
                 2,
             )
         )
-        text = f"{project['source_currency']} {project['source_cost']} x 0.8 = {0.8 * project['source_cost']}"
+        original_price = float(
+            round(
+                (Fraction(project["source_cost"]) / Fraction(project["rounded_hours"])),
+                2,
+            )
+        )
         if project['source_currency'] != project['target_currency']:
-             #(USD 195 * 0.8 = 156.0. USD / EUR 0.93112)
-            text += f" (1 {project['source_currency']} = {float(project['exchange_rate'])} {project['target_currency']})"
+            text = f"{project['source_currency']} {original_price} x 0.8 x {float(project['exchange_rate'])} = {project['target_currency']}) {price}"
+        else:
+            text = f"{project['source_currency']} {original_price} x 0.8 = {project['source_currency']} {price}"
         items.append(
             LineItem(
                 name=project["project"],

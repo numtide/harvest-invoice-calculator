@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
-import os
-import sys
-import calendar
+from collections import OrderedDict, defaultdict
 from typing import Dict, Any, List
 from fractions import Fraction
 from dataclasses import dataclass
@@ -40,14 +37,16 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
     )
     for entry in entries:
         client_name = entry["client"]["name"]
+        task_name = entry["task"]["name"]
+        project_name = f"{client_name} - {task_name}"
         rate = entry["task_assignment"]["hourly_rate"]
         if rate == 0 or rate is None:
             print(
-                f"WARNING, hourly rate for {client_name}/{entry['task']['name']} is 0.0, skip for export"
+                f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export"
             )
             continue
 
-        project = by_user_and_project[entry["user"]["name"]][client_name]
+        project = by_user_and_project[entry["user"]["name"]][project_name]
         rounded_hours = Fraction(entry["rounded_hours"])
         project.rounded_hours += rounded_hours
         if project.currency == "":
@@ -56,4 +55,7 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
             msg = f"Currency of customer changed from {project.currency} to {entry['client']['currency']} within the billing period. This is not supported!"
             assert project.currency == entry["client"]["currency"], msg
         project.cost += rounded_hours * Fraction(rate)
-    return by_user_and_project
+
+    for user, projects in by_user_and_project.items():
+        by_user_and_project[user] = OrderedDict(sorted(projects.items()))
+    return OrderedDict(sorted(by_user_and_project.items()))

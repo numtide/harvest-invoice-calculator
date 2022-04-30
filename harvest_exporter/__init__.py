@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import OrderedDict, defaultdict
+import sys
 from typing import Dict, Any, List
 from fractions import Fraction
 from dataclasses import dataclass
@@ -42,8 +43,8 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
         rate = entry["task_assignment"]["hourly_rate"]
         if rate == 0 or rate is None:
             print(
-                f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export"
-            )
+                f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export",
+                file=sys.stderr)
             continue
 
         project = by_user_and_project[entry["user"]["name"]][project_name]

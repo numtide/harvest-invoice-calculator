@@ -68,8 +68,8 @@ def parse_args() -> argparse.Namespace:
         print("--month flag conflicts with --start and --end", file=sys.stderr)
         sys.exit(1)
     if args.month:
-        first_day, last_day = calendar.monthrange(today.year, args.month)
-        args.start = date(today.year, args.month, first_day).strftime("%Y%m%d")
+        _, last_day = calendar.monthrange(today.year, args.month)
+        args.start = date(today.year, args.month, 1).strftime("%Y%m%d")
         args.end = date(today.year, args.month, last_day).strftime("%Y%m%d")
     elif (args.start and not args.end) or (args.end and not args.start):
         print("both --start and --end flag must be passed", file=sys.stderr)

@@ -11,7 +11,7 @@
         packages = {
           harvest-exporter = pkgs.callPackage ./harvest-exporter.nix {};
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix {};
-          sevdesk = pkgs.callPackage ./sevdesk.nix {};
+          sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix {};
         };
         devShell = pkgs.callPackage ./shell.nix {};
         defaultPackage = packages.harvest-exporter;

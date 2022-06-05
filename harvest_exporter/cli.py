@@ -3,7 +3,7 @@
 import argparse
 import os
 import sys
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import calendar
 
 from . import export, aggregate_time_entries
@@ -76,9 +76,11 @@ def parse_args() -> argparse.Namespace:
         print("both --start and --end flag must be passed", file=sys.stderr)
         sys.exit(1)
     elif not args.start and not args.end:
+        # Show the previous month by default
         start_of_month = today.replace(day=1)
-        args.start = start_of_month.strftime("%Y%m%d")
-        args.end = today.strftime("%Y%m%d")
+        end_of_previous_month = start_of_month - timedelta(days=1)
+        args.start = end_of_previous_month.strftime("%Y%m01")
+        args.end = end_of_previous_month.strftime("%Y%m%d")
 
     return args
 

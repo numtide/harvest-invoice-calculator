@@ -19,19 +19,20 @@ def parse_args() -> argparse.Namespace:
         "--harvest-account-id",
         default=account,
         required=account is None,
-        help="Get one from https://id.getharvest.com/developers",
+        help="Get one from https://id.getharvest.com/developers (env: HARVEST_ACCOUNT_ID)",
     )
     token = os.environ.get("HARVEST_BEARER_TOKEN")
     parser.add_argument(
         "--harvest-bearer-token",
         default=os.environ.get("HARVEST_BEARER_TOKEN"),
         required=token is None,
-        help="Get one from https://id.getharvest.com/developers",
+        help="Get one from https://id.getharvest.com/developers (env: HARVEST_BEARER_TOKEN)",
     )
     parser.add_argument(
         "--user",
         type=str,
-        help="user to filter for",
+        default=os.environ.get("HARVEST_USER"),
+        help="user to filter for (env: HARVEST_USER)",
     )
     parser.add_argument(
         "--start",

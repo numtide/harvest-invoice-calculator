@@ -25,9 +25,10 @@ def as_humanreadable(
                 currencies[project.currency] = project.exchange_rate(currency)
             cost = round_cents(project.cost)
             converted_cost = round_cents(project.converted_cost(currency))
+            converted_hourly_rate = round_cents(project.converted_hourly_rate(currency))
 
             print(
-                f"  {project_name}: {float(project.rounded_hours)}h, {cost} {project.currency} -> {converted_cost} {currency}"
+                f"  {project_name} ({project.hourly_rate} {project.currency}/h -> {converted_hourly_rate} {currency}/h): {float(project.rounded_hours)}h -> {converted_cost} {currency}"
             )
         print("Exchange rates")
         for source_currency, rate in currencies.items():
@@ -61,8 +62,10 @@ def as_csv(
                     end_date=end_date,
                     project=project_name,
                     rounded_hours=float(project.rounded_hours),
+                    source_hourly_rate=round_cents(project.hourly_rate),
                     source_cost=round_cents(project.cost),
                     source_currency=project.currency,
+                    target_hourly_rate=round_cents(project.converted_hourly_rate(currency)),
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
                     exchange_rate=float(project.exchange_rate(currency))
@@ -83,8 +86,10 @@ def as_json(
                     end_date=end_date,
                     project=project_name,
                     rounded_hours=float(project.rounded_hours),
+                    source_hourly_rate=round_cents(project.hourly_rate),
                     source_cost=round_cents(project.cost),
                     source_currency=project.currency,
+                    target_hourly_rate=round_cents(project.converted_hourly_rate(currency)),
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
                     exchange_rate=float(project.exchange_rate(currency))

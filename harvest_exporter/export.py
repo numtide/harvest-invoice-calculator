@@ -28,7 +28,7 @@ def as_humanreadable(
             converted_hourly_rate = round_cents(project.converted_hourly_rate(currency))
 
             print(
-                f"  {project_name} ({project.hourly_rate} {project.currency} -> {converted_hourly_rate} {currency}): {float(project.rounded_hours)}h -> {converted_cost} {currency}"
+                f"  {project_name} ({project.hourly_rate} {project.currency}/h -> {converted_hourly_rate} {currency}/h): {float(project.rounded_hours)}h -> {converted_cost} {currency}"
             )
         print("Exchange rates")
         for source_currency, rate in currencies.items():

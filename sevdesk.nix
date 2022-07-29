@@ -6,16 +6,17 @@
 , httpx
 , python-dateutil
 , poetry-core
+, exceptiongroup
 }:
 
 buildPythonPackage {
   pname = "SevDesk-Python-Client";
-  version = "2022-04-06";
+  version = "2022-08-29";
   src = fetchFromGitHub {
     owner = "Mic92";
     repo = "SevDesk-Python-Client";
-    rev = "dba3fab846958423132420d5b6b175a4bff39912";
-    sha256 = "sha256-DrUnWIqV6kw/jwcfI8Zu5IKH4pIxQCVZv5IWNICcdPE=";
+    rev = "476add1951a41ecba53d82443d0d6eca7a828f89";
+    sha256 = "sha256-0x6iPyNmuT64xZv1bLS3dcZ240edp6Ldja9b4H8t4A0=";
   };
   postPatch = ''
     sed -i -e 's/"^.*"/"*"/' pyproject.toml
@@ -28,6 +29,7 @@ buildPythonPackage {
     cattrs
     httpx
     python-dateutil
+    exceptiongroup
   ];
   nativeBuildInputs =  [
     poetry-core

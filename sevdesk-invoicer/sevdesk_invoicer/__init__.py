@@ -54,10 +54,9 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
                 2,
             )
         )
+        text = ""
         if project['source_currency'] != project['target_currency']:
-            text = f"{project['source_currency']} {original_price} x 0.8 x {float(project['exchange_rate'])} = {project['target_currency']} {price}"
-        else:
-            text = f"{project['source_currency']} {original_price} x 0.8 = {project['source_currency']} {price}"
+            text = f"{project['source_currency']} {original_price} x {float(project['exchange_rate'])} = {project['target_currency']} {price}"
         items.append(
             LineItem(
                 name=project["project"],

@@ -5,4 +5,5 @@ let
 in pkgs.mkShell {
   nativeBuildInputs = sevdesk-invoicer.nativeBuildInputs ++ harvest-exporter.nativeBuildInputs;
   propagatedBuildInputs = sevdesk-invoicer.propagatedBuildInputs ++ harvest-exporter.propagatedBuildInputs;
+  dontUseSetuptoolsShellHook = 1;
 }

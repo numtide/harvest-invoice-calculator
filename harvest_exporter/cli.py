@@ -53,7 +53,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--year",
         type=int,
-        choices=range(1, 13),
         help="Year to generate report for (conflicts with `--start` and `--end`)",
     )
     parser.add_argument(

@@ -51,6 +51,12 @@ def parse_args() -> argparse.Namespace:
         help="Month to generate report for (conflicts with `--start` and `--end`)",
     )
     parser.add_argument(
+        "--year",
+        type=int,
+        choices=range(1, 13),
+        help="Year to generate report for (conflicts with `--start` and `--end`)",
+    )
+    parser.add_argument(
         "--currency",
         default="EUR",
         type=str,
@@ -69,9 +75,12 @@ def parse_args() -> argparse.Namespace:
         print("--month flag conflicts with --start and --end", file=sys.stderr)
         sys.exit(1)
     if args.month:
-        _, last_day = calendar.monthrange(today.year, args.month)
-        args.start = date(today.year, args.month, 1).strftime("%Y%m%d")
-        args.end = date(today.year, args.month, last_day).strftime("%Y%m%d")
+        year = today.year
+        if args.year:
+            year = args.year
+        _, last_day = calendar.monthrange(year, args.month)
+        args.start = date(year, args.month, 1).strftime("%Y%m%d")
+        args.end = date(year, args.month, last_day).strftime("%Y%m%d")
     elif (args.start and not args.end) or (args.end and not args.start):
         print("both --start and --end flag must be passed", file=sys.stderr)
         sys.exit(1)

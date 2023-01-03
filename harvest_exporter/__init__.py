@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from .transferwise import exchange_rate
 
-NUMTIDE_RATE = 0.8
+NUMTIDE_RATE = 0.75
 
 def convert_currency(amount: Fraction, source_currency: str, target_currency: str) -> Fraction:
     rate = exchange_rate(source_currency, target_currency)
@@ -51,7 +51,7 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
             continue
 
         project = by_user_and_project[entry["user"]["name"]][project_name]
-        # the developer's hourly rate is what we charge to the customer, minus 20%
+        # the developer's hourly rate is what we charge to the customer, minus 25%
         project.hourly_rate = rate * NUMTIDE_RATE
         rounded_hours = Fraction(entry["rounded_hours"])
         project.rounded_hours += rounded_hours

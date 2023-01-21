@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import List, Dict, Any
-from .rest import http_request
+from rest import http_request
 
 
 def get_time_entries(

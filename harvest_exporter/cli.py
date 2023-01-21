@@ -7,7 +7,7 @@ from datetime import datetime, date, timedelta
 import calendar
 
 from . import export, aggregate_time_entries
-from .harvest import get_time_entries
+from harvest import get_time_entries
 
 
 def parse_args() -> argparse.Namespace:

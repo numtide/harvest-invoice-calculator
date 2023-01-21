@@ -3,7 +3,7 @@
 import functools
 from fractions import Fraction
 
-from .rest import http_request
+from rest import http_request
 
 
 @functools.cache

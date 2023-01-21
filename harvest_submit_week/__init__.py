@@ -7,7 +7,6 @@ from typing import NoReturn
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from tempfile import NamedTemporaryFile
 import subprocess
 
@@ -57,7 +56,7 @@ def main() -> None:
     try:
         submit_week(driver, start_url, email, password)
     except Exception as e:
-        print(f"submitting fails with:")
+        print("submitting fails with:")
         traceback.print_exception(e)
 
         with NamedTemporaryFile(suffix=".png", delete=False) as f:

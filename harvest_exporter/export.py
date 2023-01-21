@@ -23,7 +23,7 @@ def as_humanreadable(
         for project_name, project in projects.items():
             if project.currency != currency:
                 currencies[project.currency] = project.exchange_rate(currency)
-            cost = round_cents(project.cost)
+            round_cents(project.cost)
             converted_cost = round_cents(project.converted_cost(currency))
             converted_hourly_rate = round_cents(project.converted_hourly_rate(currency))
 

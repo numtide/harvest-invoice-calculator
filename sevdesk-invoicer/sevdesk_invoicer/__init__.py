@@ -13,7 +13,7 @@ from typing import Dict, Any, List
 
 from sevdesk import Client
 from sevdesk.contact import Customer
-from sevdesk.client.models import Invoice, DocumentModelTaxType
+from sevdesk.client.models import DocumentModelTaxType
 from sevdesk.accounting import (
     Invoice,
     InvoiceStatus,

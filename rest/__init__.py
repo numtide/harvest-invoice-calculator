@@ -1,7 +1,6 @@
 from typing import Dict, Optional, Any
 import json
 import urllib.request
-import http.client
 
 
 def http_request(

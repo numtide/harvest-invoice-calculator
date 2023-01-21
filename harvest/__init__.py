@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from rest import http_request
 
 

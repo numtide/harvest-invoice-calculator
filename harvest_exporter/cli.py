@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
+import calendar
 import os
 import sys
-from datetime import datetime, date, timedelta
-import calendar
+from datetime import date, datetime, timedelta
 
-from . import export, aggregate_time_entries
 from harvest import get_time_entries
+
+from . import aggregate_time_entries, export
 
 
 def parse_args() -> argparse.Namespace:

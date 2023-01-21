@@ -4,22 +4,22 @@
 # we can make it more flexible.
 
 import argparse
+import json
 import os
 import sys
-import json
-from fractions import Fraction
 from datetime import datetime
-from typing import Dict, Any, List
+from fractions import Fraction
+from typing import Any, Dict, List
 
 from sevdesk import Client
-from sevdesk.contact import Customer
-from sevdesk.client.models import DocumentModelTaxType
 from sevdesk.accounting import (
     Invoice,
     InvoiceStatus,
     LineItem,
     Unity,
 )
+from sevdesk.client.models import DocumentModelTaxType
+from sevdesk.contact import Customer
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,7 +55,7 @@ def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
             )
         )
         text = ""
-        if project['source_currency'] != project['target_currency']:
+        if project["source_currency"] != project["target_currency"]:
             text = f"{project['source_currency']} {original_price} x {float(project['exchange_rate'])} = {project['target_currency']} {price}"
         items.append(
             LineItem(

@@ -14,14 +14,14 @@
       imports = [
         inputs.treefmt-nix.flakeModule
       ];
-      perSystem = { config, self', inputs', pkgs, lib, system, ... }: {
+      perSystem = { config, pkgs, lib, ... }: {
         devShells.default = pkgs.callPackage ./shell.nix {
           treefmt = config.treefmt.build.wrapper;
         };
         packages = {
-          harvest-exporter = pkgs.callPackage ./harvest-exporter.nix {};
-          sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix {};
-          sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix {};
+          harvest-exporter = pkgs.callPackage ./harvest-exporter.nix { };
+          sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
+          sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix { };
           default = config.packages.harvest-exporter;
         };
         treefmt = {
@@ -36,12 +36,12 @@
               options = [
                 "-eucx"
                 ''
-                export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.statix pkgs.deadnix pkgs.nixpkgs-fmt ]}
-                deadnix --edit "$@"
-                # statix breaks flake.nix's requirement for making outputs a function
-                echo "$@" | xargs -P$(nproc) -n1 statix fix -i flake.nix node-env.nix
-                nixpkgs-fmt "$@"
-              ''
+                  export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.statix pkgs.deadnix pkgs.nixpkgs-fmt ]}
+                  deadnix --edit "$@"
+                  # statix breaks flake.nix's requirement for making outputs a function
+                  echo "$@" | xargs -P$(nproc) -n1 statix fix -i flake.nix node-env.nix
+                  nixpkgs-fmt "$@"
+                ''
                 "--"
               ];
               includes = [ "*.nix" ];
@@ -51,9 +51,9 @@
               options = [
                 "-eucx"
                 ''
-                ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
-                ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
-              ''
+                  ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
+                  ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
+                ''
                 "--" # this argument is ignored by bash
               ];
               includes = [ "*.py" ];

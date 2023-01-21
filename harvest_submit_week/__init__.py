@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import subprocess
+import sys
 import traceback
+from tempfile import NamedTemporaryFile
 from typing import NoReturn
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from tempfile import NamedTemporaryFile
-import subprocess
+
 
 # for debugging
 def screen(driver: webdriver.Chrome):

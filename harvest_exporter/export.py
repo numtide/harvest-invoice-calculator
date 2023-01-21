@@ -1,7 +1,7 @@
-from fractions import Fraction
-import sys
 import csv
 import json
+import sys
+from fractions import Fraction
 
 from . import Aggregated
 
@@ -23,7 +23,7 @@ def as_humanreadable(
         for project_name, project in projects.items():
             if project.currency != currency:
                 currencies[project.currency] = project.exchange_rate(currency)
-            cost = round_cents(project.cost)
+            round_cents(project.cost)
             converted_cost = round_cents(project.converted_cost(currency))
             converted_hourly_rate = round_cents(project.converted_hourly_rate(currency))
 
@@ -48,7 +48,7 @@ def as_csv(
         "source_currency",
         "target_cost",
         "target_currency",
-        "exchange_rate"
+        "exchange_rate",
     ]
 
     writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
@@ -65,10 +65,12 @@ def as_csv(
                     source_hourly_rate=round_cents(project.hourly_rate),
                     source_cost=round_cents(project.cost),
                     source_currency=project.currency,
-                    target_hourly_rate=round_cents(project.converted_hourly_rate(currency)),
+                    target_hourly_rate=round_cents(
+                        project.converted_hourly_rate(currency)
+                    ),
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
-                    exchange_rate=float(project.exchange_rate(currency))
+                    exchange_rate=float(project.exchange_rate(currency)),
                 )
             )
 
@@ -89,10 +91,12 @@ def as_json(
                     source_hourly_rate=round_cents(project.hourly_rate),
                     source_cost=round_cents(project.cost),
                     source_currency=project.currency,
-                    target_hourly_rate=round_cents(project.converted_hourly_rate(currency)),
+                    target_hourly_rate=round_cents(
+                        project.converted_hourly_rate(currency)
+                    ),
                     target_cost=round_cents(project.converted_cost(currency)),
                     target_currency=currency,
-                    exchange_rate=float(project.exchange_rate(currency))
+                    exchange_rate=float(project.exchange_rate(currency)),
                 )
             )
     json.dump(data, sys.stdout, indent=4, sort_keys=True)

@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 
-from collections import OrderedDict, defaultdict
 import sys
-from typing import Dict, Any, List
-from fractions import Fraction
+from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
+from fractions import Fraction
+from typing import Any, Dict, List
 
 from .transferwise import exchange_rate
 
 NUMTIDE_RATE = 0.75
 
-def convert_currency(amount: Fraction, source_currency: str, target_currency: str) -> Fraction:
+
+def convert_currency(
+    amount: Fraction, source_currency: str, target_currency: str
+) -> Fraction:
     rate = exchange_rate(source_currency, target_currency)
     return amount * rate
+
 
 @dataclass
 class Project:
@@ -47,7 +51,8 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
         if rate == 0 or rate is None:
             print(
                 f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export",
-                file=sys.stderr)
+                file=sys.stderr,
+            )
             continue
 
         project = by_user_and_project[entry["user"]["name"]][project_name]

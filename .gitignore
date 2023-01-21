@@ -27,3 +27,4 @@ MANIFEST
 
 .envrc.local
 result
+.direnv

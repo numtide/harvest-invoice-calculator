@@ -1,7 +1,6 @@
-from typing import Dict, Optional, Any
 import json
 import urllib.request
-import http.client
+from typing import Any, Dict, Optional
 
 
 def http_request(

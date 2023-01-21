@@ -31,7 +31,7 @@ buildPythonPackage {
     python-dateutil
     exceptiongroup
   ];
-  nativeBuildInputs =  [
+  nativeBuildInputs = [
     poetry-core
   ];
   format = "pyproject";

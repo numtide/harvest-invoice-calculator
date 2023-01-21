@@ -2,19 +2,64 @@
   description = "Flake utils demo";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/master";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-parts.url = "github:hercules-ci/flake-parts";
+  inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
-      rec {
+  outputs = inputs @ { flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+      imports = [
+        inputs.treefmt-nix.flakeModule
+      ];
+      perSystem = { config, self', inputs', pkgs, lib, system, ... }: {
+        devShells.default = pkgs.callPackage ./shell.nix {
+          treefmt = config.treefmt.build.wrapper;
+        };
         packages = {
           harvest-exporter = pkgs.callPackage ./harvest-exporter.nix {};
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix {};
           sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix {};
+          default = config.packages.harvest-exporter;
         };
-        devShell = pkgs.callPackage ./shell.nix {};
-        defaultPackage = packages.harvest-exporter;
-      }
-    );
+        treefmt = {
+          # Used to find the project root
+          projectRootFile = "flake.lock";
+
+          programs.terraform.enable = true;
+
+          settings.formatter = {
+            nix = {
+              command = "sh";
+              options = [
+                "-eucx"
+                ''
+                export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.statix pkgs.deadnix pkgs.nixpkgs-fmt ]}
+                deadnix --edit "$@"
+                # statix breaks flake.nix's requirement for making outputs a function
+                echo "$@" | xargs -P$(nproc) -n1 statix fix -i flake.nix node-env.nix
+                nixpkgs-fmt "$@"
+              ''
+                "--"
+              ];
+              includes = [ "*.nix" ];
+            };
+            python = {
+              command = "sh";
+              options = [
+                "-eucx"
+                ''
+                ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
+                ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
+              ''
+                "--" # this argument is ignored by bash
+              ];
+              includes = [ "*.py" ];
+            };
+          };
+        };
+      };
+    };
 }

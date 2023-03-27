@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
@@ -25,6 +26,7 @@ class Project:
     cost: Fraction = Fraction(0)
     hourly_rate: Fraction = Fraction(0)
     currency: str = ""
+    country_code: str = ""
 
     def exchange_rate(self, currency: str) -> Fraction:
         return exchange_rate(self.currency, currency)
@@ -46,6 +48,19 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
     for entry in entries:
         client_name = entry["client"]["name"]
         task_name = entry["task"]["name"]
+        actual_project_name = entry["project"]["name"]
+        # Parse the numtide country code from the project name
+        m = re.match(r".+ - (UK|CH)$", actual_project_name)
+
+        if m is None:
+            print(
+                f"WARNING, project name {actual_project_name} does not contain a country code. Assuming UK",
+                file=sys.stderr,
+            )
+            country_code = "UK"
+        else:
+            country_code = m.group(1)
+
         project_name = f"{client_name} - {task_name}"
         rate = entry["task_assignment"]["hourly_rate"]
         if rate == 0 or rate is None:
@@ -60,6 +75,12 @@ def aggregate_time_entries(entries: List[Dict[str, Any]]) -> Aggregated:
         project.hourly_rate = rate * NUMTIDE_RATE
         rounded_hours = Fraction(entry["rounded_hours"])
         project.rounded_hours += rounded_hours
+        if project.country_code == "":
+            project.country_code = country_code
+        else:
+            msg = f"Country code of customer changed from {project.country_code} to {country_code} within the billing period. This is not supported!"
+            assert project.country_code == country_code, msg
+
         if project.currency == "":
             project.currency = entry["client"]["currency"]
         else:

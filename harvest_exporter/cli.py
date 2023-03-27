@@ -63,6 +63,13 @@ def parse_args() -> argparse.Namespace:
         help="Target currency to convert to, i.e EUR",
     )
     parser.add_argument(
+        "--country",
+        default=None,
+        type=str,
+        choices=("UK", "CH"),
+        help="Numtide UK/Numtide CH",
+    )
+    parser.add_argument(
         "--format",
         default="humanreadable",
         choices=("humanreadable", "csv", "json"),
@@ -101,6 +108,7 @@ def main() -> None:
     )
 
     by_user_and_project = aggregate_time_entries(entries)
+
     if args.user:
         for_user = by_user_and_project.get(args.user)
         if not for_user:
@@ -110,6 +118,15 @@ def main() -> None:
             )
             sys.exit(1)
         by_user_and_project = {args.user: for_user}
+
+    if args.country:
+        for user, projects in by_user_and_project.items():
+            to_delete = []
+            for name, project in projects.items():
+                if args.country != project.country_code:
+                    to_delete.append(name)
+            for name in to_delete:
+                del projects[name]
     fn = None
     if args.format == "humanreadable":
         fn = export.as_humanreadable

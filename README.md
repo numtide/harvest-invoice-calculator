@@ -35,6 +35,13 @@ harvest-exporter --month 3
 harvest-exporter --user "Jörg Thalheim"
 ```
 
+* Filter by country (UK/CH)
+
+``` console
+harvest-exporter --country UK
+harvest-exporter --country CH
+```
+
 * Generate using json output
 
 ```console

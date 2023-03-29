@@ -34,12 +34,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "json_file", help="JSON file containing reports (as opposed to stdin)"
     )
+    parser.add_argument(
+        "customer", help="Customer number of the customer to create the invoice for"
+    )
     return parser.parse_args()
 
 
-def create_invoice(api_token: str, projects: List[Dict[str, Any]]) -> None:
+def create_invoice(
+    api_token: str, customer: str, projects: List[Dict[str, Any]]
+) -> None:
     client = Client(base_url="https://my.sevdesk.de/api/v1", token=api_token)
-    customer = Customer.get_by_customer_number(client, "1000")
+    customer = Customer.get_by_customer_number(client, customer)
     items = []
     for project in projects:
         price = float(
@@ -96,7 +101,7 @@ def main() -> None:
             projects = json.load(f)
     else:
         projects = json.load(sys.stdin)
-    create_invoice(args.sevdesk_api_token, projects)
+    create_invoice(args.sevdesk_api_token, args.customer, projects)
 
 
 if __name__ == "__main__":

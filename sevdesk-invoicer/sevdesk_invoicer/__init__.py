@@ -35,7 +35,8 @@ def parse_args() -> argparse.Namespace:
         "json_file", help="JSON file containing reports (as opposed to stdin)"
     )
     parser.add_argument(
-        "customer", help="Customer number of the customer to create the invoice for"
+        "customer",
+        help="Customer number of the customer to create the invoice for i.e. 1000",
     )
     return parser.parse_args()
 

@@ -5,13 +5,11 @@ pkgs.python3.pkgs.buildPythonApplication {
   src = ./.;
 
   nativeBuildInputs = [
-    pkgs.python3.pkgs.black
     pkgs.python3.pkgs.mypy
   ];
 
   doCheck = true;
   checkPhase = ''
     mypy harvest_exporter
-    black --check .
   '';
 }

@@ -9,7 +9,6 @@ def http_request(
     headers: Dict[str, str] = {},
     data: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-
     body = None
     if data:
         body = json.dumps(data).encode("ascii")

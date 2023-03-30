@@ -32,11 +32,11 @@ def parse_args() -> argparse.Namespace:
         help="Get one from https://my.sevdesk.de/#/admin/userManagement",
     )
     parser.add_argument(
-        "json_file", help="JSON file containing reports (as opposed to stdin)"
+        "--customer",
+        help="Customer number of the customer to create the invoice for i.e. 1000",
     )
     parser.add_argument(
-        "customer",
-        help="Customer number of the customer to create the invoice for i.e. 1000",
+        "json_file", help="JSON file containing reports (as opposed to stdin)"
     )
     return parser.parse_args()
 

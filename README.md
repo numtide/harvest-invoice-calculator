@@ -54,6 +54,26 @@ harvest-exporter --format json
 harvest-exporter --currency CHF
 ```
 
+* Generate an invoice with [sevdesk](https://sevdesk.de)
+
+Generate a bill from the harvest exprt for the customer with the ID 1000
+
+```
+$ sevdesk-invoicer --customer "1000" harvest.json
+```
+
+* Calculate working days from harvest time report.
+
+  For income tax in Germany one can claim money back for each day. The time report can be obtained from [here](https://numtide.harvestapp.com/reports) for each user.
+  Than run this script:
+
+
+``` console
+$ working-days-calculator report.csv
+Working days: 171 from 2022-01-12 00:00:00 to 2022-12-29 00:00:00
+```
+
+
 ## API References
 
 * [Harvest](https://help.getharvest.com/api-v2)

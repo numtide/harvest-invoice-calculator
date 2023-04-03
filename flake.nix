@@ -24,6 +24,14 @@
           harvest-exporter = pkgs.callPackage ./harvest-exporter.nix { };
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
           sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix { };
+
+          working-days-calculator = pkgs.writers.writePython3Bin "working-days-calculator"
+            {
+              libraries = [ pkgs.python3Packages.pandas ];
+              flakeIgnore = [ "E501" ];
+            }
+            (builtins.readFile ./working-days-calculator.py);
+
           default = config.packages.harvest-exporter;
         };
         treefmt = {

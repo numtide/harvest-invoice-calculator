@@ -22,6 +22,7 @@
         };
         packages = {
           harvest-exporter = pkgs.callPackage ./harvest-exporter.nix { };
+          transferwise-exporter = pkgs.callPackage ./transferwise-exporter.nix { };
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
           sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix { };
 

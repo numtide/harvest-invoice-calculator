@@ -5,6 +5,7 @@ import calendar
 import os
 import sys
 from datetime import date, datetime, timedelta
+from fractions import Fraction
 
 from harvest import get_time_entries
 
@@ -28,6 +29,11 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("HARVEST_BEARER_TOKEN"),
         required=token is None,
         help="Get one from https://id.getharvest.com/developers (env: HARVEST_BEARER_TOKEN)",
+    )
+    parser.add_argument(
+        "--hourly-rate",
+        type=Fraction,
+        help="Use this hourly rate instead of the one from harvest",
     )
     parser.add_argument(
         "--user",
@@ -107,7 +113,7 @@ def main() -> None:
         args.harvest_account_id, args.harvest_bearer_token, args.start, args.end
     )
 
-    by_user_and_project = aggregate_time_entries(entries)
+    by_user_and_project = aggregate_time_entries(entries, args.hourly_rate)
 
     if args.user:
         for_user = by_user_and_project.get(args.user)

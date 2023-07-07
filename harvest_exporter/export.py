@@ -28,7 +28,7 @@ def as_humanreadable(
             converted_hourly_rate = round_cents(project.converted_hourly_rate(currency))
 
             print(
-                f"  {project_name} ({project.hourly_rate} {project.currency}/h -> {converted_hourly_rate} {currency}/h): {float(project.rounded_hours)}h -> {converted_cost} {currency}"
+                f"  {project_name} ({float(round(project.hourly_rate, 2))} {project.currency}/h -> {converted_hourly_rate} {currency}/h): {float(project.rounded_hours)}h -> {converted_cost} {currency}"
             )
         print("Exchange rates")
         for source_currency, rate in currencies.items():
@@ -46,8 +46,10 @@ def as_csv(
         "rounded_hours",
         "source_cost",
         "source_currency",
+        "source_hourly_rate",
         "target_cost",
         "target_currency",
+        "target_hourly_rate",
         "exchange_rate",
     ]
 

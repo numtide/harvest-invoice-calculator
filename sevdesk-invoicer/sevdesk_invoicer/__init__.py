@@ -73,8 +73,8 @@ def create_invoice(
                 price=price,
             )
         )
-    start = datetime.strptime(projects[0]["start_date"], "%Y%m%d")
-    end = datetime.strptime(projects[0]["end_date"], "%Y%m%d")
+    start = datetime.strptime(str(projects[0]["start_date"]), "%Y%m%d")
+    end = datetime.strptime(str(projects[0]["end_date"]), "%Y%m%d")
 
     head_text = """
     Terms of payment: Payment within 30 days from receipt of invoice without deductions.

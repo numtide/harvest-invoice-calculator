@@ -1,8 +1,8 @@
 { pkgs ? import <nixpkgs> { } }:
 pkgs.python3.pkgs.buildPythonApplication {
-  pname = "transferwise-exporter";
+  pname = "wise-exporter";
   version = "0.0.1";
-  src = ./transferwise-exporter;
+  src = ./wise-exporter;
   propagatedBuildInputs = [
     pkgs.python3.pkgs.rsa
   ];
@@ -14,7 +14,7 @@ pkgs.python3.pkgs.buildPythonApplication {
 
   doCheck = true;
   checkPhase = ''
-    mypy transferwise_exporter
+    mypy wise_exporter
     black --check .
     ruff .
   '';

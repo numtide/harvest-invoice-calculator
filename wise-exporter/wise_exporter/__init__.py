@@ -34,7 +34,7 @@ class Signer:
         return signature
 
 
-class TransferwiseClient:
+class WiseClient:
     def __init__(self, api_key: str, private_key: bytes) -> None:
         self.api_key = api_key
         self.signer = Signer(private_key)
@@ -63,7 +63,7 @@ class TransferwiseClient:
     ) -> dict[str, Any] | list[dict[str, Any]]:
         headers["Authorization"] = f"Bearer {self.api_key}"
         headers["Content-Type"] = "application/json"
-        headers["User-Agent"] = "Numtide transferwise importer"
+        headers["User-Agent"] = "Numtide wise importer"
         try:
             return self._http_request(f"{BASE_URL}/{path}", method, headers, data)
         except urllib.error.HTTPError as e:
@@ -87,7 +87,7 @@ class TransferwiseClient:
             )
         if len(profiles) > 1:
             die(
-                f"Found multiple business profiles: {' '.join(p['id'] for p in r)}.\nSelect one by setting the TRANSFERWISE_PROFILE environment variable."
+                f"Found multiple business profiles: {' '.join(p['id'] for p in r)}.\nSelect one by setting the WISE_PROFILE environment variable."
             )
         return profiles[0]
 
@@ -114,28 +114,28 @@ def die(msg: str) -> NoReturn:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    api_token = os.environ.get("TRANSFERWISE_API_TOKEN")
+    api_token = os.environ.get("WISE_API_TOKEN")
     parser.add_argument(
-        "--transferswise-api-token",
+        "--wise-api-token",
         default=api_token,
         required=api_token is None,
         help="Get one from https://wise.com/settings/",
     )
-    private_key = os.environ.get("TRANSFERWISE_PRIVATE_KEY")
+    private_key = os.environ.get("WISE_PRIVATE_KEY")
     parser.add_argument(
-        "--transferswise-private-key",
+        "--wise-private-key",
         default=private_key,
         help="Upload one to https://wise.com/settings/",
     )
-    raw_profile_id = os.environ.get("TRANSFERWISE_PROFILE")
+    raw_profile_id = os.environ.get("WISE_PROFILE")
     profile_id = None
     if raw_profile_id is not None:
         try:
             profile_id = int(raw_profile_id)
         except ValueError:
-            die("TRANSFERWISE_PROFILE must be an integer")
+            die("WISE_PROFILE must be an integer")
     parser.add_argument(
-        "--transferswise-profile",
+        "--wise-profile",
         type=int,
         default=profile_id,
         help="Profile ID to use",
@@ -162,9 +162,9 @@ def parse_args() -> argparse.Namespace:
         help="Year to generate report for (conflicts with `--start` and `--end`)",
     )
     args = parser.parse_args()
-    if not args.transferswise_private_key:
+    if not args.wise_private_key:
         msg = """
---transferswise-private-key is not set
+--wise-private-key is not set
 
 You can generate a key pair using the following commands:
 
@@ -204,16 +204,14 @@ ccount settings.
 def main() -> None:
     args = parse_args()
 
-    client = TransferwiseClient(
-        args.transferswise_api_token, args.transferswise_private_key.encode("ascii")
-    )
-    if not args.transferswise_profile:
-        args.transferswise_profile = client.get_buisness_profile()
-    balances = client.get_balances(args.transferswise_profile)
+    client = WiseClient(args.wise_api_token, args.wise_private_key.encode("ascii"))
+    if not args.wise_profile:
+        args.wise_profile = client.get_buisness_profile()
+    balances = client.get_balances(args.wise_profile)
     statement_per_account = []
     for balance in balances:
         statements = client.get_balance_statements(
-            args.transferswise_profile, balance, args.start, args.end
+            args.wise_profile, balance, args.start, args.end
         )
         statement_per_account.append(statements)
 

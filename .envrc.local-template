@@ -11,3 +11,12 @@ export HARVEST_USER="<YOUR NAME>"
 # To use havest-submit-week
 export HARVEST_EMAIL=""
 export HARVEST_PASSWORD=""
+
+# optional: for wise exporter
+# export WISE_API_TOKEN=<TODO>
+# export WISE_PRIVATE_KEY=$(cat <<EOF
+# -----BEGIN RSA PRIVATE KEY-----
+# ...
+# -----END RSA PRIVATE KEY-----
+# EOF
+# )

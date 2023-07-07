@@ -34,6 +34,12 @@ class Signer:
         return signature
 
 
+class Balance:
+    def __init__(self, balance_id: int, currency: str) -> None:
+        self.id = balance_id
+        self.currency = currency
+
+
 class WiseClient:
     def __init__(self, api_key: str, private_key: bytes) -> None:
         self.api_key = api_key
@@ -91,15 +97,15 @@ class WiseClient:
             )
         return profiles[0]
 
-    def get_balances(self, profile: int) -> list[int]:
+    def get_balances(self, profile: int) -> list[Balance]:
         r = self.http_request(f"/v4/profiles/{profile}/balances?types=STANDARD")
         assert isinstance(r, list)
-        return [a["id"] for a in r]
+        return [Balance(a["id"], a["currency"]) for a in r]
 
     def get_balance_statements(
-        self, profile: int, balance_id: int, start: str, end: str
+        self, profile: int, balance: Balance, start: str, end: str
     ) -> dict[str, Any]:
-        path = f"/v1/profiles/{profile}/balance-statements/{balance_id}/statement.json?currency=EUR&intervalStart={start}T00:00:00.000Z&intervalEnd={end}T23:59:59.999Z&type=COMPACT"
+        path = f"/v1/profiles/{profile}/balance-statements/{balance.id}/statement.json?currency={balance.currency}&intervalStart={start}T00:00:00.000Z&intervalEnd={end}T23:59:59.999Z&type=COMPACT"
         r = self.http_request(path)
         assert isinstance(r, dict)
         return r

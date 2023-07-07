@@ -6,7 +6,8 @@ in
 pkgs.mkShell {
   packages = sevdesk-invoicer.nativeBuildInputs
     ++ harvest-exporter.nativeBuildInputs
-    ++ pkgs.lib.optional (treefmt != null) treefmt;
+    ++ pkgs.lib.optional (treefmt != null) treefmt
+    ++ [ pkgs.python3Packages.rsa ];
   propagatedBuildInputs = sevdesk-invoicer.propagatedBuildInputs ++ harvest-exporter.propagatedBuildInputs;
   dontUseSetuptoolsShellHook = 1;
 }

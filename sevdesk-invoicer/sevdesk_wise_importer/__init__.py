@@ -259,14 +259,16 @@ def import_statements(
         paymt_purpose = wise_transaction["details"].get(
             "paymentReference", wise_transaction["details"]["description"]
         )
+        date = datetime.datetime.strptime(
+            wise_transaction["date"], "%Y-%m-%dT%H:%M:%S.%fZ"
+        ).replace(tzinfo=datetime.timezone.utc)
         transaction = CheckAccountTransactionModel(
             check_account=CheckAccountTransactionModelCheckAccount(
                 id=account_id, object_name="CheckAccount"
             ),
             status=CheckAccountTransactionModelStatus.VALUE_100,
-            value_date=datetime.datetime.strptime(
-                wise_transaction["date"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).replace(tzinfo=datetime.timezone.utc),
+            value_date=date,
+            entry_date=date,
             amount=wise_transaction["amount"]["value"],
             payee_payer_name=payee_payer_name,
             paymt_purpose=paymt_purpose,

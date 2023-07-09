@@ -204,7 +204,7 @@ def import_statements(
         )
         create_transaction.sync(client=client, json_body=transaction)
         imported_transactions.add(transaction_id)
-        import_state_file.write_text(json.dumps(list(imported_transactions)))
+        import_state_file.write_text(json.dumps(list(imported_transactions), indent=2))
 
 
 def main() -> None:

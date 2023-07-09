@@ -67,7 +67,7 @@ def get_or_create_account(client: Client, name: str, currency: str) -> int:
                 return obj.id
     account = CheckAccountModel(
         name=name,
-        type=CheckAccountModelType.OFFLINE,
+        type=CheckAccountModelType.ONLINE,
         currency=currency,
         status=CheckAccountModelStatus.VALUE_100,
         id=UNSET,
@@ -130,77 +130,6 @@ def import_statements(
     datetime.datetime.strptime(
         statements["query"]["intervalEnd"], "%Y-%m-%dT%H:%M:%S.%fZ"
     ).replace(tzinfo=datetime.timezone.utc)
-
-    #    {
-    #  "type": "DEBIT",
-    #  "date": "2023-06-29T16:05:20.348031Z",
-    #  "amount": {
-    #    "value": -239.98,
-    #    "currency": "EUR",
-    #    "zero": false
-    #  },
-    #  "totalFees": {
-    #    "value": 0,
-    #    "currency": "EUR",
-    #    "zero": true
-    #  },
-    #  "details": {
-    #    "type": "TRANSFER",
-    #    "description": "Sent money to Condor Flugdienst GmbH",
-    #    "recipient": {
-    #      "name": "Condor Flugdienst GmbH",
-    #      "bankAccount": "DE32500100600997935605"
-    #    },
-    #    "paymentReference": "39014664HHH6112502 Joerg Thalheim"
-    #  },
-    #  "exchangeDetails": null,
-    #  "runningBalance": {
-    #    "value": 1700.08,
-    #    "currency": "EUR",
-    #    "zero": false
-    #  },
-    #  "referenceNumber": "TRANSFER-728562157",
-    #  "attachment": {
-    #    "activityId": "TU9ORVRBUllfQUNUSVZJVFk6OjQwNjQxMDAwOjpUUkFOU0ZFUjo6NzI4NTYyMTU3",
-    #    "profileId": 40641000,
-    #    "items": [],
-    #    "downloadLink": null,
-    #    "note": "Oceansprint"
-    #  },
-    #  "activityAssetAttributions": []
-    # },
-    #      {
-    #        "type": "CREDIT",
-    #        "date": "2023-06-19T08:28:58.882875Z",
-    #        "amount": {
-    #          "value": 2000,
-    #          "currency": "EUR",
-    #          "zero": false
-    #        },
-    #        "totalFees": {
-    #          "value": 0,
-    #          "currency": "EUR",
-    #          "zero": true
-    #        },
-    #        "details": {
-    #          "type": "DEPOSIT",
-    #          "description": "Received money from JORG FALK THALHEIM with reference For liquidity",
-    #          "senderName": "JORG FALK THALHEIM",
-    #          "senderAccount": "(SOBKDEB2XXX) DE92110101015987198028",
-    #          "paymentReference": "For liquidity",
-    #          "recipientAccountNumber": "6604029",
-    #          "recipientAccountDetailsId": 37228457
-    #        },
-    #        "exchangeDetails": null,
-    #        "runningBalance": {
-    #          "value": 2000,
-    #          "currency": "EUR",
-    #          "zero": false
-    #        },
-    #        "referenceNumber": "TRANSFER-718742358",
-    #        "attachment": null,
-    #        "activityAssetAttributions": []
-    #      },
 
     if import_state_file.exists():
         imported_transactions = set(json.loads(import_state_file.read_text()))

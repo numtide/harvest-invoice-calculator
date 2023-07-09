@@ -11,12 +11,12 @@
 
 buildPythonPackage {
   pname = "SevDesk-Python-Client";
-  version = "2023-07-07";
+  version = "2023-07-09";
   src = fetchFromGitHub {
     owner = "Mic92";
     repo = "SevDesk-Python-Client";
-    rev = "61f12c0741d194f0e865bd06f08b07f3dc679e2d";
-    sha256 = "sha256-k/3GnXs9MIQSET7WopO3J5vH3O6gjL8G9Zww2VWpUXg=";
+    rev = "3ceb95e91e645d07867c0275cac4de7eff589eee";
+    sha256 = "sha256-I7ZEcoQEGFVZJ+IGp5z5qlpNCeo0jf9f5K4lipKzIpM=";
   };
   postPatch = ''
     sed -i -e 's/"^.*"/"*"/' pyproject.toml

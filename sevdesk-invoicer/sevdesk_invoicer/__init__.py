@@ -43,6 +43,12 @@ def parse_args() -> argparse.Namespace:
         help="Ignore customer from json and assume this one instead",
     )
     parser.add_argument(
+        "--payment-method",
+        required=False,
+        type=int,
+        help="Payment method id to use for invoice. You can find the id by saving an existing method and see what the id is in the url in your network tab inspector.",
+    )
+    parser.add_argument(
         "json_file", help="JSON file containing reports (as opposed to stdin)"
     )
     return parser.parse_args()
@@ -110,7 +116,10 @@ def item_for_client(task: Dict[str, Any]) -> LineItem:
 
 
 def create_invoice(
-    api_token: str, customer_name: Optional[str], tasks: List[Dict[str, Any]]
+    api_token: str,
+    customer_name: Optional[str],
+    payment_method: Optional[str],
+    tasks: List[Dict[str, Any]],
 ) -> None:
     client = Client(base_url="https://my.sevdesk.de/api/v1", token=api_token)
 
@@ -145,6 +154,9 @@ def create_invoice(
         delivery_date_until=end,
         items=items,
     )
+    if payment_method:
+        invoice.payment_method = payment_method
+
     invoice.create(client)
     pass
 
@@ -156,7 +168,7 @@ def main() -> None:
             tasks = json.load(f)
     else:
         tasks = json.load(sys.stdin)
-    create_invoice(args.sevdesk_api_token, args.customer, tasks)
+    create_invoice(args.sevdesk_api_token, args.customer, args.payment_method, tasks)
 
 
 if __name__ == "__main__":

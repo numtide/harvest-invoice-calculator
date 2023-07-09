@@ -51,6 +51,7 @@ def as_csv(
         "user",
         "start_date",
         "end_date",
+        "agency",
         "client",
         "task",
         "rounded_hours",
@@ -67,24 +68,25 @@ def as_csv(
     writer.writeheader()
     for user_name, user in users.items():
         for client_name, client in user.clients.items():
-            for task_name, project in client.tasks.items():
+            for task_name, task in client.tasks.items():
                 writer.writerow(
                     dict(
                         user=user_name,
                         start_date=start_date,
                         end_date=end_date,
+                        agency=task.agency,
                         client=client_name,
                         task=task_name,
-                        rounded_hours=float(project.rounded_hours),
-                        source_hourly_rate=round_cents(project.hourly_rate),
-                        source_cost=round_cents(project.cost),
-                        source_currency=project.currency,
+                        rounded_hours=float(task.rounded_hours),
+                        source_hourly_rate=round_cents(task.hourly_rate),
+                        source_cost=round_cents(task.cost),
+                        source_currency=task.currency,
                         target_hourly_rate=round_cents(
-                            project.converted_hourly_rate(currency)
+                            task.converted_hourly_rate(currency)
                         ),
-                        target_cost=round_cents(project.converted_cost(currency)),
+                        target_cost=round_cents(task.converted_cost(currency)),
                         target_currency=currency,
-                        exchange_rate=float(project.exchange_rate(currency)),
+                        exchange_rate=float(task.exchange_rate(currency)),
                     )
                 )
 
@@ -98,24 +100,25 @@ def as_json(
     data = []
     for user_name, user in users.items():
         for client_name, client in user.clients.items():
-            for task_name, project in client.tasks.items():
+            for task_name, task in client.tasks.items():
                 data.append(
                     dict(
                         user=user_name,
                         start_date=start_date,
                         end_date=end_date,
+                        agency=task.agency,
                         client=client_name,
                         task=task_name,
-                        rounded_hours=float(project.rounded_hours),
-                        source_hourly_rate=round_cents(project.hourly_rate),
-                        source_cost=round_cents(project.cost),
-                        source_currency=project.currency,
+                        rounded_hours=float(task.rounded_hours),
+                        source_hourly_rate=round_cents(task.hourly_rate),
+                        source_cost=round_cents(task.cost),
+                        source_currency=task.currency,
                         target_hourly_rate=round_cents(
-                            project.converted_hourly_rate(currency)
+                            task.converted_hourly_rate(currency)
                         ),
-                        target_cost=round_cents(project.converted_cost(currency)),
+                        target_cost=round_cents(task.converted_cost(currency)),
                         target_currency=currency,
-                        exchange_rate=float(project.exchange_rate(currency)),
+                        exchange_rate=float(task.exchange_rate(currency)),
                     )
                 )
     json.dump(data, sys.stdout, indent=4, sort_keys=True)

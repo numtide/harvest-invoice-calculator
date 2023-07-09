@@ -40,6 +40,17 @@ class Task:
     def converted_hourly_rate(self, currency: str) -> Fraction:
         return convert_currency(self.hourly_rate, self.currency, currency)
 
+    @property
+    def agency(self) -> str:
+        if self.is_external:
+            return "-"
+        elif self.country_code == "UK":
+            return "Numtide Ltd."
+        elif self.country_code == "CH":
+            return "Numtide Sàrl"
+        else:
+            raise Exception(f"Unknown country code: {self.country_code}")
+
 
 class Client:
     def __init__(self) -> None:

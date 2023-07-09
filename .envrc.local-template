@@ -20,3 +20,7 @@ export HARVEST_PASSWORD=""
 # -----END RSA PRIVATE KEY-----
 # EOF
 # )
+
+# Optional: for harvest-report
+#export IMAP_PASSWORD=<TODO>
+#export OPENAI_API_KEY=<TODO>

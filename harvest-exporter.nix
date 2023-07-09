@@ -8,6 +8,10 @@ pkgs.python3.pkgs.buildPythonApplication {
     pkgs.python3.pkgs.mypy
   ];
 
+  postPatch = ''
+    sed -i "/harvest-report/d" setup.cfg
+  '';
+
   doCheck = true;
   checkPhase = ''
     mypy harvest_exporter

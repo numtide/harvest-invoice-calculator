@@ -9,7 +9,7 @@ from fractions import Fraction
 
 from harvest import get_time_entries
 
-from . import aggregate_time_entries, export
+from . import Task, aggregate_time_entries, export
 
 
 def parse_args() -> argparse.Namespace:
@@ -63,6 +63,11 @@ def parse_args() -> argparse.Namespace:
         help="Year to generate report for (conflicts with `--start` and `--end`)",
     )
     parser.add_argument(
+        "--client",
+        type=str,
+        help="Export report for this client only",
+    )
+    parser.add_argument(
         "--currency",
         default="EUR",
         type=str,
@@ -104,7 +109,24 @@ def parse_args() -> argparse.Namespace:
         args.start = end_of_previous_month.strftime("%Y%m01")
         args.end = end_of_previous_month.strftime("%Y%m%d")
 
+    if args.client and args.country:
+        print("--client and --country flag conflict", file=sys.stderr)
+        sys.exit(1)
+
     return args
+
+
+def exclude_task(task: Task, args: argparse.Namespace) -> bool:
+    if args.client == task.client:
+        # allow to export external projects if --client is passed and matches
+        return False
+    if args.client:
+        return True
+
+    # Only export internal projects if --country is passed and matches
+    if args.country:
+        return args.country != task.country_code
+    return task.is_external
 
 
 def main() -> None:
@@ -113,26 +135,27 @@ def main() -> None:
         args.harvest_account_id, args.harvest_bearer_token, args.start, args.end
     )
 
-    by_user_and_project = aggregate_time_entries(entries, args.hourly_rate)
+    users = aggregate_time_entries(entries, args.hourly_rate)
 
     if args.user:
-        for_user = by_user_and_project.get(args.user)
+        for_user = users.get(args.user)
         if not for_user:
             print(
-                f"user {args.user} not found in time range, found {', '.join(by_user_and_project.keys())}",
+                f"user {args.user} not found in time range, found {', '.join(users.keys())}",
                 file=sys.stderr,
             )
             sys.exit(1)
-        by_user_and_project = {args.user: for_user}
+        users = {args.user: for_user}
 
-    if args.country:
-        for user, projects in by_user_and_project.items():
+    for _, user in users.items():
+        for _, client in user.clients.items():
             to_delete = []
-            for name, project in projects.items():
-                if args.country != project.country_code:
+            for name, task in client.tasks.items():
+                if exclude_task(task, args):
                     to_delete.append(name)
             for name in to_delete:
-                del projects[name]
+                del client.tasks[name]
+
     fn = None
     if args.format == "humanreadable":
         fn = export.as_humanreadable
@@ -140,7 +163,7 @@ def main() -> None:
         fn = export.as_csv
     else:  # args.format == "json":
         fn = export.as_json
-    fn(by_user_and_project, args.start, args.end, args.currency)
+    fn(users, args.start, args.end, args.currency)
 
 
 if __name__ == "__main__":

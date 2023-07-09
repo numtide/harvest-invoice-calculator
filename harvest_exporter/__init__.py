@@ -20,13 +20,16 @@ def convert_currency(
 
 
 @dataclass
-class Project:
+class Task:
+    name: str = ""
+    client: str = ""
     # Use fractions here to avoid rounding errors, round to cents once on export
     rounded_hours: Fraction = Fraction(0)
     cost: Fraction = Fraction(0)
     hourly_rate: Fraction = Fraction(0)
     currency: str = ""
     country_code: str = ""
+    is_external: bool = False
 
     def exchange_rate(self, currency: str) -> Fraction:
         return exchange_rate(self.currency, currency)
@@ -38,61 +41,98 @@ class Project:
         return convert_currency(self.hourly_rate, self.currency, currency)
 
 
-Aggregated = Dict[str, Dict[str, Project]]
+class Client:
+    def __init__(self) -> None:
+        self.tasks: Dict[str, Task] = defaultdict(Task)
+
+    def sort(self) -> None:
+        self.tasks = OrderedDict(sorted(self.tasks.items()))
+
+
+class User:
+    def __init__(self) -> None:
+        self.clients: Dict[str, Client] = defaultdict(Client)
+
+    def sort(self) -> None:
+        self.clients = OrderedDict(sorted(self.clients.items()))
+        for client in self.clients.values():
+            client.sort()
+
+
+def get_numtide_country(entry: Dict[str, Any]) -> str:
+    name = entry["project"]["name"]
+    # Parse the numtide country code from the project name
+    m = re.match(r".+ - (UK|CH)$", name)
+    if m is None:
+        print(
+            f"WARNING, project name {name} does not contain a country code. Assuming UK",
+            file=sys.stderr,
+        )
+        return "UK"
+    else:
+        return m.group(1)
+
+
+def process_entry(
+    entry: Dict[str, Any],
+    users: Dict[str, User],
+    hourly_rate: Optional[Fraction],
+) -> None:
+    task_name = entry["task"]["name"]
+    is_external = entry["client"]["name"].startswith("External - ")
+
+    if is_external:
+        # External projects don't have a country code
+        country_code = "Unset"
+        client_name = entry["project"]["name"]
+    else:
+        country_code = get_numtide_country(entry)
+        client_name = entry["client"]["name"]
+
+    if hourly_rate is not None:
+        rate = hourly_rate
+    else:
+        rate = entry["task_assignment"]["hourly_rate"]
+        if rate == 0 or rate is None:
+            print(
+                f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export",
+                file=sys.stderr,
+            )
+            return
+
+    task = users[entry["user"]["name"]].clients[client_name].tasks[task_name]
+    task.name = task_name
+    task.client = client_name
+    # the developer's hourly rate is what we charge to the customer, minus 25%
+    task.hourly_rate = rate * Fraction(NUMTIDE_RATE)
+    if task.is_external:
+        task.hourly_rate = rate
+    else:
+        task.hourly_rate = rate * Fraction(NUMTIDE_RATE)
+    rounded_hours = Fraction(entry["rounded_hours"])
+    task.rounded_hours += rounded_hours
+    task.is_external = is_external
+    if task.country_code == "":
+        task.country_code = country_code
+    else:
+        msg = f"Country code of customer changed from {task.country_code} to {country_code} within the billing period. This is not supported!"
+        assert task.country_code == country_code, msg
+
+    if task.currency == "":
+        task.currency = entry["client"]["currency"]
+    else:
+        msg = f"Currency of customer changed from {task.currency} to {entry['client']['currency']} within the billing period. This is not supported!"
+        assert task.currency == entry["client"]["currency"], msg
+    task.cost += rounded_hours * Fraction(task.hourly_rate)
 
 
 def aggregate_time_entries(
     entries: List[Dict[str, Any]], hourly_rate: Optional[Fraction]
-) -> Aggregated:
-    by_user_and_project: Dict[str, Dict[str, Project]] = defaultdict(
-        lambda: defaultdict(lambda: Project())
-    )
+) -> Dict[str, User]:
+    users: Dict[str, User] = defaultdict(User)
     for entry in entries:
-        client_name = entry["client"]["name"]
-        task_name = entry["task"]["name"]
-        actual_project_name = entry["project"]["name"]
-        # Parse the numtide country code from the project name
-        m = re.match(r".+ - (UK|CH)$", actual_project_name)
+        process_entry(entry, users, hourly_rate)
 
-        if m is None:
-            print(
-                f"WARNING, project name {actual_project_name} does not contain a country code. Assuming UK",
-                file=sys.stderr,
-            )
-            country_code = "UK"
-        else:
-            country_code = m.group(1)
-
-        project_name = f"{client_name} - {task_name}"
-        if hourly_rate is not None:
-            rate = hourly_rate
-        else:
-            rate = entry["task_assignment"]["hourly_rate"]
-            if rate == 0 or rate is None:
-                print(
-                    f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export",
-                    file=sys.stderr,
-                )
-                continue
-
-        project = by_user_and_project[entry["user"]["name"]][project_name]
-        # the developer's hourly rate is what we charge to the customer, minus 25%
-        project.hourly_rate = rate * Fraction(NUMTIDE_RATE)
-        rounded_hours = Fraction(entry["rounded_hours"])
-        project.rounded_hours += rounded_hours
-        if project.country_code == "":
-            project.country_code = country_code
-        else:
-            msg = f"Country code of customer changed from {project.country_code} to {country_code} within the billing period. This is not supported!"
-            assert project.country_code == country_code, msg
-
-        if project.currency == "":
-            project.currency = entry["client"]["currency"]
-        else:
-            msg = f"Currency of customer changed from {project.currency} to {entry['client']['currency']} within the billing period. This is not supported!"
-            assert project.currency == entry["client"]["currency"], msg
-        project.cost += rounded_hours * Fraction(project.hourly_rate)
-
-    for user, projects in by_user_and_project.items():
-        by_user_and_project[user] = OrderedDict(sorted(projects.items()))
-    return OrderedDict(sorted(by_user_and_project.items()))
+    for _, user in users.items():
+        user.sort()
+    return OrderedDict(sorted(users.items()))

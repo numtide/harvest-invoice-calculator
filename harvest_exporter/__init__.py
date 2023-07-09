@@ -114,11 +114,11 @@ def process_entry(
     task = users[entry["user"]["name"]].clients[client_name].tasks[task_name]
     task.name = task_name
     task.client = client_name
-    # the developer's hourly rate is what we charge to the customer, minus 25%
-    task.hourly_rate = rate * Fraction(NUMTIDE_RATE)
+    task.is_external = is_external
     if task.is_external:
         task.hourly_rate = rate
     else:
+        # the developer's hourly rate is what we charge to the customer, minus 25%
         task.hourly_rate = rate * Fraction(NUMTIDE_RATE)
     rounded_hours = Fraction(entry["rounded_hours"])
     task.rounded_hours += rounded_hours

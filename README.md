@@ -54,6 +54,22 @@ harvest-exporter --format json
 harvest-exporter --currency CHF
 ```
 
+* Override hourly rate:
+
+```
+harvest-exporter  --hourly-rate 100
+```
+
+This will override the hourly rate reported by harvest prior to applying the nutmide rate.
+
+* Filter by client:
+
+```
+harvest-exporter --client "Kuutamo"
+```
+
+This can be also used to export hours for clients that are external to numtide (client name starting with "External -")
+
 * Generate an invoice with [sevdesk](https://sevdesk.de)
 
 Generate a bill from the harvest exprt for the customer with the ID 1000
@@ -72,6 +88,7 @@ $ sevdesk-invoicer --customer "1000" harvest.json
 $ working-days-calculator report.csv
 Working days: 171 from 2022-01-12 00:00:00 to 2022-12-29 00:00:00
 ```
+
 
 
 ## API References

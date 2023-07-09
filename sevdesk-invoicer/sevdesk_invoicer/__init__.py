@@ -13,14 +13,6 @@ from typing import Any, Dict, List, Optional
 
 from sevdesk import Client
 from sevdesk.accounting import Invoice, InvoiceStatus, LineItem, Unity
-
-# def find_contacts_by_custom_field_value
-#    client: Client,
-#    value: str,
-#    custom_field_settingid: Union[Unset, None, str] = UNSET,
-#    custom_field_settingobject_name: Union[Unset, None, str] = UNSET,
-#    custom_field_name: str,
-# ) -> Dict[str, Any]:
 from sevdesk.client.api.contact import get_contacts
 from sevdesk.client.models import DocumentModelTaxType
 from sevdesk.common import SevDesk
@@ -125,6 +117,7 @@ def create_invoice(
 
     start = datetime.strptime(str(tasks[0]["start_date"]), "%Y%m%d")
     end = datetime.strptime(str(tasks[0]["end_date"]), "%Y%m%d")
+    currency = tasks[0]["target_currency"]
     agency = tasks[0]["agency"]
     has_agency = agency != "-"
     if customer_name:
@@ -152,6 +145,7 @@ def create_invoice(
         tax_type=DocumentModelTaxType.NOTEU,
         delivery_date=start,
         delivery_date_until=end,
+        currency=currency,
         items=items,
     )
     if payment_method:

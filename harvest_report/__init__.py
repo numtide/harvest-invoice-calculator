@@ -20,7 +20,7 @@ from typing import Any
 from harvest import get_time_entries
 
 
-def monthly_work_summary(prompt: str, api_key: str) -> str:
+def chatgpt(prompt: str, api_key: str) -> str:
     conn = http.client.HTTPSConnection("api.openai.com")
     headers = {
         "Content-Type": "application/json",
@@ -36,7 +36,6 @@ def monthly_work_summary(prompt: str, api_key: str) -> str:
     response = conn.getresponse()
     if response.status == 200:
         msg = json.loads(response.read())
-        breakpoint()
         return msg["choices"][0]["message"]["content"]
     else:
         raise Exception(f"Error: {response.status} {response.reason}")
@@ -136,7 +135,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mail-subject-monthly",
         type=str,
-        default="Timesheet report for $month/$year",
+        default="Monthly timesheet summary for $month/$year",
         help="Template for mail subject for monthly report",
     )
     parser.add_argument(
@@ -156,6 +155,14 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="Drafts",
         help="IMAP Draft folder",
+    )
+    parser.add_argument(
+        "--gpt-prompt",
+        type=str,
+        default="""
+cLan is a solution to build a decentral network based on NixOS nodes.
+Write a short montly summary of my work on the cLan project based on my daily summaries without referring to concrete dates: \n
+        """,
     )
 
     args = parser.parse_args()
@@ -227,10 +234,8 @@ def markdown_to_html(markdown: str) -> str:
     return res.stdout.strip()
 
 
-def render_weekly_html(args: argparse.Namespace, entries: list[dict[str, Any]]) -> str:
-    html = ""
-    html += f"<h1>Report for week {args.calendar_week:02d}, {args.year}</h1>"
-    html += "<table>"
+def render_time_table(args: argparse.Namespace, entries: list[dict[str, Any]]) -> str:
+    html = "<table>"
     html += "<tr><th>Date</th><th>Hours</th><th>Notes</th></tr>"
     for entry in entries:
         res = subprocess.run(
@@ -243,28 +248,34 @@ def render_weekly_html(args: argparse.Namespace, entries: list[dict[str, Any]]) 
         notes = res.stdout.strip()
         date = datetime.strptime(entry["spent_date"], "%Y-%m-%d")
         weekday = date.strftime("%A")
-        html += f"<tr><td>{entry['spent_date']} ({weekday})</td><td>{entry['rounded_hours']}</td><td>{notes}</td></tr>"
+        html += f"<tr><td>{entry['spent_date']} ({weekday})</td><td>{entry['rounded_hours']}</td><td>{notes}</td></tr>\n"
     html += "</table>"
+    return html
+
+
+def render_weekly_html(args: argparse.Namespace, entries: list[dict[str, Any]]) -> str:
+    html = ""
+    html += f"<h1>Report for week {args.calendar_week:02d}, {args.year}</h1>"
+    html += render_time_table(args, entries)
     return html
 
 
 def render_monthly_summary_html(
     args: argparse.Namespace, entries: list[dict[str, Any]]
 ) -> str:
-    prompt = "cLan is a solution to build a decentral network based on NixOS nodes."
-    prompt += "Write a short montly summary of my work on the cLan project based on my daily summaries without referring to concrete dates: \n"
+    prompt = args.gpt_prompt
     time_entries = ""
     for entry in entries:
         time_entries += f"Date: {entry['spent_date']}\nNotes: {entry['notes']}\n\n"
     prompt += time_entries
 
-    draft = f"## Monthly timesheet summary for {args.month:02d}/{args.year}\n"
-    draft += "<!--\n"
-    draft += time_entries
-    draft += "\n-->\n"
+    timetable = render_time_table(args, entries)
+    draft = "<!--\n"
+    draft += timetable
+    draft += "-->\n\n"
 
     if args.openai_api_key:
-        draft += monthly_work_summary(prompt, args.openai_api_key)
+        draft += chatgpt(prompt, args.openai_api_key)
 
     editor = os.environ.get("EDITOR", "vim")
 
@@ -276,7 +287,11 @@ def render_monthly_summary_html(
         tf.seek(0)
         edited_text = tf.read().decode("utf-8")
 
-    return markdown_to_html(edited_text)
+    html = f"<h1> Monthly timesheet summary for {args.month:02d}/{args.year}</h1>\n"
+    html += timetable
+    html += markdown_to_html(edited_text)
+
+    return html
 
 
 def get_entries(args: argparse.Namespace) -> list[dict[str, Any]]:
@@ -298,6 +313,7 @@ def main() -> None:
     entries = get_entries(args)
     if args.month:
         html = render_monthly_summary_html(args, entries)
+
     else:
         html = render_weekly_html(args, entries)
     if args.format == "html":

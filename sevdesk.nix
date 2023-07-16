@@ -15,8 +15,8 @@ buildPythonPackage {
   src = fetchFromGitHub {
     owner = "Mic92";
     repo = "SevDesk-Python-Client";
-    rev = "80840fa02b91dcaf87c9631094cbf43a419ef6eb";
-    sha256 = "sha256-gBxfBPoBp5tIAexzIRSBM+05ebm1Q0ilHfCvlYabHr8=";
+    rev = "dd5f7b0ebd607be969daa67413aee55edbbbc525";
+    sha256 = "sha256-J77KcdHFwEmK4Q/DlxvTBDpLnJh6/buSJqaX4Lj2n2g=";
   };
   postPatch = ''
     sed -i -e 's/"^.*"/"*"/' pyproject.toml

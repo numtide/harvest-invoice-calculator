@@ -179,6 +179,8 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["originator"]
             elif t == "TRANSFER":
                 payee_payer_name = wise_transaction["details"]["recipient"]["name"]
+            elif t == "CARD":
+                payee_payer_name = wise_transaction["details"]["merchant"]["name"]
             elif t == "UNKNOWN":  # seen only for initial account purchase so far
                 payee_payer_name = "Wise"
             else:

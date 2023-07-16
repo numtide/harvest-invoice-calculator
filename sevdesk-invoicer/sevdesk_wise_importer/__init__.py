@@ -169,10 +169,17 @@ def import_statements(
 
         t = wise_transaction["details"]["type"]
         if wise_transaction["type"] == "CREDIT":
-            if t == "MONEY_ADDED":
+            if t == "MONEY_ADDED" or t == "UNKNOWN":
                 payee_payer_name = wise_transaction["details"]["description"]
+            elif t == "CARD":
+                payee_payer_name = wise_transaction["details"]["merchant"]["name"]
             else:
-                payee_payer_name = wise_transaction["details"]["senderName"]
+                payee_payer_name = wise_transaction["details"].get("senderName")
+                if payee_payer_name is None:
+                    pprint.pprint(wise_transaction)
+                    die(
+                        f"Unknown transaction type {t} in transaction above, no senderName"
+                    )
         else:
             t = wise_transaction["details"]["type"]
             if t == "DIRECT_DEBIT":

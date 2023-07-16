@@ -86,6 +86,7 @@ def upload_file(file: BufferedReader, api_token: str) -> None:
         supplier = VoucherModelSupplier(
             id=voucher["supplier"]["id"],
             object_name="Contact",
+        )
 
     filename = res1.objects.filename
     sum_net = val_or_unset(voucher.get("sumNet"))

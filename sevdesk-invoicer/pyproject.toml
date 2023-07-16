@@ -15,3 +15,7 @@ no_implicit_optional = true
 [[tool.mypy.overrides]]
 module = "setuptools.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sevdesk.*"
+ignore_missing_imports = true

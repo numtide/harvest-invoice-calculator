@@ -180,6 +180,14 @@ Write a short montly summary of my work on the cLan project based on my daily su
         args.start = date(args.year, args.month, 1).strftime("%Y%m%d")
         args.end = date(args.year, args.month, last_day).strftime("%Y%m%d")
 
+    if args.imap_host:
+        if not args.imap_username:
+            print("Please specify --imap-username")
+            sys.exit(1)
+        if not args.imap_password:
+            print("Please specify --imap-password")
+            sys.exit(1)
+
     return args
 
 

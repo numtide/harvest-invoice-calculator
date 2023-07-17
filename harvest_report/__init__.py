@@ -244,6 +244,7 @@ def markdown_to_html(markdown: str) -> str:
 
 def render_time_table(args: argparse.Namespace, entries: list[dict[str, Any]]) -> str:
     html = "<table>"
+    html += "<colgroup><col width='20%'><col width='10%'><col width='70%'></colgroup>"
     html += "<tr><th>Date</th><th>Hours</th><th>Notes</th></tr>"
     for entry in entries:
         res = subprocess.run(
@@ -262,9 +263,15 @@ def render_time_table(args: argparse.Namespace, entries: list[dict[str, Any]]) -
 
 
 def render_weekly_html(args: argparse.Namespace, entries: list[dict[str, Any]]) -> str:
-    html = ""
-    html += f"<h1>Report for week {args.calendar_week:02d}, {args.year}</h1>"
+    title = f"Report for week {args.calendar_week:02d}, {args.year}"
+    html = "<html>"
+    html += "<head>"
+    html += f"<title>{title}</title>"
+    html += "</head>"
+    html += "<body>"
     html += render_time_table(args, entries)
+    html += "</body>"
+    html += "</html>"
     return html
 
 

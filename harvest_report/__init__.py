@@ -141,7 +141,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mail-body",
         type=str,
-        default="Please find the timesheed report attached to this email.",
+        default="Please find the timesheet report attached to this email.",
         help="Mail body",
     )
     parser.add_argument(

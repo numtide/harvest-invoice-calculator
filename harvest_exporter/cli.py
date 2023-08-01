@@ -90,7 +90,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--format",
         default="humanreadable",
-        choices=("humanreadable", "csv", "json"),
+        choices=("humanreadable", "csv", "json", "table"),
         type=str,
         help="Output format",
     )
@@ -181,6 +181,8 @@ def main() -> None:
         fn = export.as_humanreadable
     elif args.format == "csv":
         fn = export.as_csv
+    elif args.format == "table":
+        fn = export.as_rich_table
     else:  # args.format == "json":
         fn = export.as_json
     fn(users, args.start, args.end, args.currency)

@@ -26,6 +26,7 @@
           wise-exporter = pkgs.callPackage ./wise-exporter.nix { };
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
           sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix { };
+          quipu-invoicer = pkgs.python3.pkgs.callPackage ./quipu-invoicer.nix { };
 
           working-days-calculator = pkgs.writers.writePython3Bin "working-days-calculator"
             {
@@ -40,7 +41,6 @@
           # Used to find the project root
           projectRootFile = "flake.lock";
 
-          programs.terraform.enable = true;
           programs.mypy = {
             enable = true;
             directories = {
@@ -54,6 +54,7 @@
               "wise-exporter" = {
                 extraPythonPackages = [ pkgs.python3.pkgs.rsa ];
               };
+              "quipu-invoicer" = { };
             };
           };
 

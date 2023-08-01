@@ -178,7 +178,7 @@ def import_statements(
                 if payee_payer_name is None:
                     pprint.pprint(wise_transaction)
                     die(
-                        f"Unknown transaction type {t} in transaction above, no senderName"
+                        f"Unknown transaction type {t} in transaction above of type {t}"
                     )
         else:
             t = wise_transaction["details"]["type"]
@@ -190,9 +190,16 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
             elif t == "UNKNOWN":  # seen only for initial account purchase so far
                 payee_payer_name = "Wise"
+            elif (
+                t == "CONVERSION"
+                and wise_transaction["details"]["sourceAmount"]["currency"]
+                == wise_transaction["details"]["targetAmount"]["currency"]
+            ):
+                # this happens when we add money to a jar
+                continue
             else:
                 pprint.pprint(wise_transaction)
-                die(f"Unknown transaction type {t} in transaction above")
+                die(f"Unknown transaction type {t} in transaction above of type {t}")
 
         paymt_purpose = wise_transaction["details"].get(
             "paymentReference", wise_transaction["details"]["description"]

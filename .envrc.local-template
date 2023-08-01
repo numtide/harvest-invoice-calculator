@@ -24,3 +24,7 @@ export HARVEST_PASSWORD=""
 # Optional: for harvest-report
 #export IMAP_PASSWORD=<TODO>
 #export OPENAI_API_KEY=<TODO>
+
+# To use quipu_invoicer
+#export QUIPU_APP_ID=<TODO>
+#export QUIPU_APP_SECRET=<TODO>

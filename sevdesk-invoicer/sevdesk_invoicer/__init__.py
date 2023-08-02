@@ -62,7 +62,7 @@ def get_contact_by_name(client: Client, name: str) -> Contact:
     return Contact._from_contact_model(client, contacts[0])
 
 
-def item_for_agency(task: Dict[str, Any]) -> LineItem:
+def line_item(task: Dict[str, Any], has_agency: bool) -> LineItem:
     price = float(
         round(
             (Fraction(task["target_cost"]) / Fraction(task["rounded_hours"])),
@@ -78,27 +78,12 @@ def item_for_agency(task: Dict[str, Any]) -> LineItem:
     text = ""
     if task["source_currency"] != task["target_currency"]:
         text = f"{task['source_currency']} {original_price} x {float(task['exchange_rate'])} = {task['target_currency']} {price}"
-    name = f"{task['client']} - {task['task']}"
+    if has_agency:
+        name = f"{task['client']} - {task['task']}"
+    else:
+        name = task["task"]
     return LineItem(
         name=name,
-        unity=Unity.HOUR,
-        tax=0,
-        text=text,
-        quantity=task["rounded_hours"],
-        price=price,
-    )
-
-
-def item_for_client(task: Dict[str, Any]) -> LineItem:
-    text = ""
-    price = float(
-        round(
-            (Fraction(task["source_cost"]) / Fraction(task["rounded_hours"])),
-            2,
-        )
-    )
-    return LineItem(
-        name=task["task"],
         unity=Unity.HOUR,
         tax=0,
         text=text,
@@ -128,7 +113,7 @@ def create_invoice(
         billing_target = tasks[0]["client"]
     items = []
     for task in tasks:
-        items.append(item_for_agency(task) if has_agency else item_for_client(task))
+        items.append(line_item(task, has_agency))
 
     customer = get_contact_by_name(client, billing_target)
 

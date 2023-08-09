@@ -32,7 +32,7 @@ harvest-exporter --month 3
 * Filter by user
 
 ```console
-harvest-exporter --user "Jörg Thalheim"
+harvest-exporter --user "Hans Maier"
 ```
 
 * Filter by country (UK/CH)
@@ -65,7 +65,7 @@ This will override the hourly rate reported by harvest prior to applying the nut
 * Filter by client:
 
 ```
-harvest-exporter --client "Kuutamo"
+harvest-exporter --client "Some client"
 ```
 
 This can be also used to export hours for clients that are external to numtide (client name starting with "External -")
@@ -88,8 +88,6 @@ $ sevdesk-invoicer --customer "1000" harvest.json
 $ working-days-calculator report.csv
 Working days: 171 from 2022-01-12 00:00:00 to 2022-12-29 00:00:00
 ```
-
-
 
 ## API References
 

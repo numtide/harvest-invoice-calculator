@@ -107,6 +107,12 @@ def parse_args() -> argparse.Namespace:
         help="OpenAI API key",
     )
     parser.add_argument(
+        "--imap-encryption",
+        type=str,
+        choices=["none", "ssl", "tls"],
+        help="IMAP username",
+    )
+    parser.add_argument(
         "--imap-host",
         type=str,
         help="IMAP host",
@@ -192,8 +198,12 @@ Write a short montly summary of my work on the cLan project based on my daily su
 
 
 def save_to_drafts(args: argparse.Namespace, report: bytes) -> None:
-    with imaplib.IMAP4(host=args.imap_host) as imap:
-        imap.starttls()
+    imap_func: Any[imaplib.IMAP4_SSL, imaplib.IMAP4] = imaplib.IMAP4
+    if args.imap_encryption == "ssl":
+        imap_func = imaplib.IMAP4_SSL
+    with imap_func(host=args.imap_host) as imap:
+        if args.imap_encryption == "starttls":
+            imap.starttls()
 
         print("Logging into mailbox...")
         imap.login(args.imap_username, args.imap_password)
@@ -224,6 +234,10 @@ def save_to_drafts(args: argparse.Namespace, report: bytes) -> None:
         message.attach(part)
 
         utf8_message = str(message).encode("utf-8")
+
+        # select mailbox
+        print(f"Selecting mailbox {args.imap_folder}...")
+        imap.select(args.imap_folder)
 
         # Send message
         imap.append(

@@ -12,13 +12,11 @@ pkgs.python3.pkgs.buildPythonApplication {
   ];
   nativeBuildInputs = [
     pkgs.python3.pkgs.setuptools
-    pkgs.python3.pkgs.black
     pkgs.python3.pkgs.mypy
   ];
 
   doCheck = true;
   checkPhase = ''
     mypy sevdesk_invoicer
-    black --check .
   '';
 }

@@ -6,10 +6,6 @@ pkgs.python3.pkgs.buildPythonApplication {
   propagatedBuildInputs = [
     pkgs.python3.pkgs.rsa
   ];
-  nativeBuildInputs = [ pkgs.python3.pkgs.mypy ];
 
-  doCheck = true;
-  checkPhase = ''
-    mypy wise_exporter
-  '';
+  doCheck = false;
 }

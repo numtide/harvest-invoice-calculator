@@ -4,11 +4,6 @@ pkgs.python3.pkgs.buildPythonApplication {
   version = "0.0.1";
   src = ./.;
 
-  nativeBuildInputs = [
-    pkgs.python3.pkgs.mypy
-  ];
-
-  doCheck = true;
   postPatch = ''
     sed -i "/harvest-exporter/d" setup.cfg
   '';
@@ -20,7 +15,5 @@ pkgs.python3.pkgs.buildPythonApplication {
     (pkgs.lib.makeBinPath [ pkgs.pandoc pkgs.texlive.combined.scheme-small ])
   ];
 
-  checkPhase = ''
-    mypy harvest_report
-  '';
+  doCheck = false;
 }

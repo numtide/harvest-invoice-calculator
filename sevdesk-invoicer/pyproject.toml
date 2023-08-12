@@ -1,9 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sevdesk-invoicer"
+description = "Generate invoices in sevdesk"
+version = "0.0.1"
+authors = [{ name = "Jörg Thalheim", email = "joerg@thalheim.io" }]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Topic :: Utilities",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+]
+[project.urls]
+Homepage = "https://github.com/numtide/numtide-invoice-generator"
+
+[project.scripts]
+sevdesk-invoicer = "sevdesk_invoicer:main"
+sevdesk-wise-importer = "sevdesk_wise_importer:main"
+sevdesk-upload = "sevdesk_upload:main"
+
+[tool.setuptools.packages]
+find = {}
+
 [tool.ruff]
 target-version = "py310"
 line-length = 88
 
 select = ["E", "F", "I"]
-ignore = [ "E501" ]
+ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"

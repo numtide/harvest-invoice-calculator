@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/master";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
-  inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
+  inputs.treefmt-nix.url = "github:numtide/treefmt-nix/mypy";
   inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = inputs @ { flake-parts, ... }:
@@ -41,6 +41,27 @@
           projectRootFile = "flake.lock";
 
           programs.terraform.enable = true;
+          programs.mypy = {
+            enable = true;
+            directories = {
+              ".".modules = [
+                "harvest"
+                "harvest_exporter"
+                "harvest_report"
+                "rest"
+                # "harvest_submit_week"
+              ];
+              "sevdesk-invoicer".modules = [
+                "sevdesk_invoicer"
+                "sevdesk_upload"
+                "sevdesk_wise_importer"
+              ];
+              "wise-exporter" = {
+                modules = [ "wise_exporter" ];
+                extraPythonPackages = [ pkgs.python3.pkgs.rsa ];
+              };
+            };
+          };
 
           settings.formatter = {
             nix = {
@@ -70,40 +91,7 @@
               ];
               includes = [ "*.py" ];
             };
-          } // (lib.mapAttrs'
-            (name: opts: lib.nameValuePair "${name}-mypy" {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  cd "${opts.dir}"
-                  export PYTHONPATH="${with pkgs.python3Packages; makePythonPath (opts.extraPkgs or [])}"
-                  ${lib.getExe pkgs.mypy} ${builtins.toString opts.modules}
-                ''
-              ];
-              includes = builtins.map (module: "${opts.dir}/${module}/*.py") opts.modules;
-            })
-            {
-              harvest = {
-                dir = "./.";
-                modules = [
-                  "harvest"
-                  "harvest_exporter"
-                  "harvest_report"
-                  "rest"
-                  # "harvest_submit_week"
-                ];
-              };
-              sevdesk-invoicer = {
-                dir = "./sevdesk-invoicer";
-                modules = [ "sevdesk_invoicer" "sevdesk_upload" "sevdesk_wise_importer" ];
-              };
-              wise-exporter = {
-                dir = "./wise-exporter";
-                modules = [ "wise_exporter" ];
-                extraPkgs = [ pkgs.python3.pkgs.rsa ];
-              };
-            });
+          };
         };
       };
     };

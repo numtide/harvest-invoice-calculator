@@ -51,13 +51,8 @@
                 "rest"
                 # "harvest_submit_week"
               ];
-              "sevdesk-invoicer".modules = [
-                "sevdesk_invoicer"
-                "sevdesk_upload"
-                "sevdesk_wise_importer"
-              ];
+              "sevdesk-invoicer" = { };
               "wise-exporter" = {
-                modules = [ "wise_exporter" ];
                 extraPythonPackages = [ pkgs.python3.pkgs.rsa ];
               };
             };

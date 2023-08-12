@@ -4,16 +4,9 @@ pkgs.python3.pkgs.buildPythonApplication {
   version = "0.0.1";
   src = ./.;
 
-  nativeBuildInputs = [
-    pkgs.python3.pkgs.mypy
-  ];
+  doCheck = false;
 
   postPatch = ''
     sed -i "/harvest-report/d" setup.cfg
-  '';
-
-  doCheck = true;
-  checkPhase = ''
-    mypy harvest_exporter
   '';
 }

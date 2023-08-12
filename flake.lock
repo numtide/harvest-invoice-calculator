@@ -50,16 +50,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1691824990,
-        "narHash": "sha256-6G7X/8wwVW7txaiMp3YOnJgQSBx8odXasOk9BeDU5ag=",
+        "lastModified": 1691833704,
+        "narHash": "sha256-ASGhgGduEgcD3gQZhGr8xtmZ3PlVY+m2HuPnIZDbu78=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "bd817ed6d1e2f3d1a929bd40704347f0709da777",
+        "rev": "19dee4bf6001849006a63f3435247316b0488e99",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
-        "ref": "mypy",
         "repo": "treefmt-nix",
         "type": "github"
       }

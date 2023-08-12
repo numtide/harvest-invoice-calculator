@@ -49,7 +49,6 @@
                 "harvest_exporter"
                 "harvest_report"
                 "rest"
-                # "harvest_submit_week"
               ];
               "sevdesk-invoicer" = { };
               "wise-exporter" = {

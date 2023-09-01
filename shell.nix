@@ -4,6 +4,9 @@ let
   sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
 in
 pkgs.mkShell {
+  shellHook = ''
+    export PATH=$PATH:$(pwd)/bin
+  '';
   packages = sevdesk-invoicer.nativeBuildInputs
     ++ harvest-exporter.nativeBuildInputs
     ++ pkgs.lib.optional (treefmt != null) treefmt

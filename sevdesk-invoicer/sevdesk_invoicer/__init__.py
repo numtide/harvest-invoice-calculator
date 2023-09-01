@@ -9,7 +9,7 @@ import os
 import sys
 from datetime import datetime
 from fractions import Fraction
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from sevdesk import Client
 from sevdesk.accounting import Invoice, InvoiceStatus, LineItem, Unity
@@ -62,7 +62,7 @@ def get_contact_by_name(client: Client, name: str) -> Contact:
     return Contact._from_contact_model(client, contacts[0])
 
 
-def line_item(task: Dict[str, Any], has_agency: bool) -> LineItem:
+def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
     price = float(
         round(
             (Fraction(task["target_cost"]) / Fraction(task["rounded_hours"])),
@@ -94,9 +94,9 @@ def line_item(task: Dict[str, Any], has_agency: bool) -> LineItem:
 
 def create_invoice(
     api_token: str,
-    customer_name: Optional[str],
-    payment_method: Optional[str],
-    tasks: List[Dict[str, Any]],
+    customer_name: str | None,
+    payment_method: str | None,
+    tasks: list[dict[str, Any]],
 ) -> None:
     client = Client(base_url="https://my.sevdesk.de/api/v1", token=api_token)
 

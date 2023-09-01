@@ -104,7 +104,8 @@ def create_invoice(
     end = datetime.strptime(str(tasks[0]["end_date"]), "%Y%m%d")
     currency = tasks[0]["target_currency"]
     agency = tasks[0]["agency"]
-    has_agency = agency != "-"
+    # agency == "-" is legacy
+    has_agency = agency != "-" or agency != "none"
     if customer_name:
         billing_target = customer_name
     elif has_agency:

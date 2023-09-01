@@ -5,7 +5,7 @@ let
 in
 pkgs.mkShell {
   shellHook = ''
-    export PATH=$PATH:./bin
+    export PATH=$PATH:$(pwd)/bin
   '';
   packages = sevdesk-invoicer.nativeBuildInputs
     ++ harvest-exporter.nativeBuildInputs

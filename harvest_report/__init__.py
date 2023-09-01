@@ -326,6 +326,9 @@ def get_entries(args: argparse.Namespace) -> list[dict[str, Any]]:
 def main() -> None:
     args = parse_args()
     entries = get_entries(args)
+    if len(entries) == 0:
+        print("No entries found in time period. Skip report")
+        sys.exit(1)
     if args.month:
         html = render_monthly_summary_html(args, entries)
 

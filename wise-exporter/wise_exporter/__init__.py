@@ -9,7 +9,7 @@ import sys
 import urllib.error
 import urllib.request
 from datetime import date, datetime, timedelta
-from typing import Any, NoReturn, Optional
+from typing import Any, NoReturn
 
 import rsa
 
@@ -50,7 +50,7 @@ class WiseClient:
         url: str,
         method: str = "GET",
         headers: dict[str, str] = {},
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[dict[str, Any]]:
         body = None
         if data:
@@ -65,7 +65,7 @@ class WiseClient:
         path: str,
         method: str = "GET",
         headers: dict[str, str] = {},
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[dict[str, Any]]:
         headers["Authorization"] = f"Bearer {self.api_key}"
         headers["Content-Type"] = "application/json"

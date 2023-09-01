@@ -9,8 +9,6 @@ from typing import Any, Dict, List, Optional
 
 from .transferwise import exchange_rate
 
-NUMTIDE_RATE = 0.75
-
 
 def convert_currency(
     amount: Fraction, source_currency: str, target_currency: str
@@ -43,7 +41,7 @@ class Task:
     @property
     def agency(self) -> str:
         if self.is_external:
-            return "-"
+            return "none"
         elif self.country_code == "UK":
             return "Numtide Ltd."
         elif self.country_code == "CH":
@@ -88,9 +86,12 @@ def process_entry(
     entry: Dict[str, Any],
     users: Dict[str, User],
     hourly_rate: Optional[Fraction],
+    agency_rate: Optional[Fraction],
 ) -> None:
     task_name = entry["task"]["name"]
-    is_external = entry["client"]["name"].startswith("External - ")
+    is_external = (
+        entry["client"]["name"].startswith("External - ") or agency_rate is None
+    )
 
     if is_external:
         # External projects don't have a country code
@@ -118,8 +119,9 @@ def process_entry(
     if task.is_external:
         task.hourly_rate = rate
     else:
+        assert agency_rate is not None
         # the developer's hourly rate is what we charge to the customer, minus 25%
-        task.hourly_rate = rate * Fraction(NUMTIDE_RATE)
+        task.hourly_rate = rate * agency_rate
     rounded_hours = Fraction(entry["rounded_hours"])
     task.rounded_hours += rounded_hours
     task.is_external = is_external
@@ -138,11 +140,13 @@ def process_entry(
 
 
 def aggregate_time_entries(
-    entries: List[Dict[str, Any]], hourly_rate: Optional[Fraction]
+    entries: List[Dict[str, Any]],
+    hourly_rate: Optional[Fraction],
+    agency_rate: Optional[Fraction],
 ) -> Dict[str, User]:
     users: Dict[str, User] = defaultdict(User)
     for entry in entries:
-        process_entry(entry, users, hourly_rate)
+        process_entry(entry, users, hourly_rate, agency_rate)
 
     for _, user in users.items():
         user.sort()

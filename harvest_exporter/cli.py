@@ -18,6 +18,13 @@ def parse_args() -> argparse.Namespace:
     )
     account = os.environ.get("HARVEST_ACCOUNT_ID")
     parser.add_argument(
+        "--agency",
+        default="numtide",
+        choices=("numtide", "none"),
+        help="Agency to filter for. Disabling agency will disable the agency rate",
+    )
+
+    parser.add_argument(
         "--harvest-account-id",
         default=account,
         required=account is None,
@@ -112,6 +119,12 @@ def parse_args() -> argparse.Namespace:
     if args.client and args.country:
         print("--client and --country flag conflict", file=sys.stderr)
         sys.exit(1)
+    if args.agency != "numtide" and args.country:
+        print("Only Numtide can have a country", file=sys.stderr)
+        sys.exit(1)
+    if args.agency == "none" and not args.client:
+        print("--client must be passed if agency is disabled", file=sys.stderr)
+        sys.exit(1)
 
     return args
 
@@ -129,13 +142,20 @@ def exclude_task(task: Task, args: argparse.Namespace) -> bool:
     return task.is_external
 
 
+NUMTIDE_RATE = Fraction(0.75)
+
+
 def main() -> None:
     args = parse_args()
     entries = get_time_entries(
         args.harvest_account_id, args.harvest_bearer_token, args.start, args.end
     )
 
-    users = aggregate_time_entries(entries, args.hourly_rate)
+    agency_rate = None
+    if args.agency == "numtide":
+        agency_rate = NUMTIDE_RATE
+
+    users = aggregate_time_entries(entries, args.hourly_rate, agency_rate)
 
     if args.user:
         for_user = users.get(args.user)

@@ -41,6 +41,13 @@ def parse_args() -> argparse.Namespace:
         help="Payment method id to use for invoice. You can find the id by saving an existing method and see what the id is in the url in your network tab inspector.",
     )
     parser.add_argument(
+        "--days-until-payment",
+        required=False,
+        type=int,
+        default=30,
+        help="Days until payment is due",
+    )
+    parser.add_argument(
         "json_file", help="JSON file containing reports (as opposed to stdin)"
     )
     return parser.parse_args()
@@ -97,6 +104,7 @@ def create_invoice(
     customer_name: str | None,
     payment_method: str | None,
     tasks: list[dict[str, Any]],
+    days_until_payment: int = 30,
 ) -> None:
     client = Client(base_url="https://my.sevdesk.de/api/v1", token=api_token)
 
@@ -118,8 +126,8 @@ def create_invoice(
 
     customer = get_contact_by_name(client, billing_target)
 
-    head_text = """
-    Terms of payment: Payment within 30 days from receipt of invoice without deductions.
+    head_text = f"""
+    Terms of payment: Payment within {days_until_payment} days from receipt of invoice without deductions.
     """
     time = start.strftime("%Y-%m")
     invoice = Invoice(
@@ -148,7 +156,13 @@ def main() -> None:
             tasks = json.load(f)
     else:
         tasks = json.load(sys.stdin)
-    create_invoice(args.sevdesk_api_token, args.customer, args.payment_method, tasks)
+    create_invoice(
+        args.sevdesk_api_token,
+        args.customer,
+        args.payment_method,
+        tasks,
+        args.days_until_payment,
+    )
 
 
 if __name__ == "__main__":

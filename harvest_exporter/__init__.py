@@ -97,9 +97,11 @@ def process_entry(
         # External projects don't have a country code
         country_code = "Unset"
         client_name = entry["project"]["name"]
+        project_name = ""
     else:
         country_code = get_numtide_country(entry)
         client_name = entry["client"]["name"]
+        project_name = entry["project"]["name"]
 
     if hourly_rate is not None:
         rate = hourly_rate
@@ -107,7 +109,7 @@ def process_entry(
         rate = entry["task_assignment"]["hourly_rate"]
         if rate == 0 or rate is None:
             print(
-                f"WARNING, hourly rate for {client_name}{task_name}/{entry['task']['name']} is 0.0, skip for export",
+                f"WARNING, hourly rate for {client_name}/{project_name}/{task_name} is 0.0, skip for export",
                 file=sys.stderr,
             )
             return

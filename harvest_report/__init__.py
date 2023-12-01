@@ -26,7 +26,7 @@ def chatgpt(prompt: str, api_key: str) -> str:
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}",
     }
-    data = {"messages": [{"role": "user", "content": prompt}], "model": "gpt-3.5-turbo"}
+    data = {"messages": [{"role": "user", "content": prompt}], "model": "gpt-4"}
     conn.request(
         "POST",
         "/v1/chat/completions",

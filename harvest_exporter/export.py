@@ -3,6 +3,9 @@ import json
 import sys
 from fractions import Fraction
 
+from rich.console import Console
+from rich.table import Table
+
 from . import User
 
 
@@ -122,3 +125,70 @@ def as_json(
                     )
                 )
     json.dump(data, sys.stdout, indent=4, sort_keys=True)
+
+
+def as_rich_table(
+    users: dict[str, User],
+    start_date: int,
+    end_date: int,
+    currency: str,
+) -> None:
+    console = Console()
+
+    table_title = f"Time Report: {start_date} to {end_date}"
+    table = Table(title=table_title, show_header=True, header_style="bold magenta")
+    table.add_column("User", style="dim")
+    table.add_column("Client")
+    table.add_column("Task")
+    table.add_column("Hours", justify="right")
+    table.add_column("Source Cost", justify="right")
+    table.add_column("Source Rate/hr", justify="right")
+    table.add_column("Target Cost (" + currency + ")", justify="right")
+    table.add_column("Target Rate/hr (" + currency + ")", justify="right")
+    table.add_column("Exchange Rate", justify="right")
+
+    total_source_cost = 0.0
+    total_target_cost = 0.0
+    total_hours = 0.0
+
+    for user_name, user in users.items():
+        for client_name, client in user.clients.items():
+            for task_name, task in client.tasks.items():
+                source_cost = round_cents(task.cost)
+                target_cost = round_cents(task.converted_cost(currency))
+                task_hours = float(task.rounded_hours)
+
+                total_source_cost += source_cost
+                total_target_cost += target_cost
+                total_hours += task_hours
+
+                table.add_row(
+                    user_name,
+                    client_name,
+                    task_name,
+                    f"{task_hours:.2f}",
+                    f"{source_cost:.2f} {task.currency}",
+                    f"{round_cents(task.hourly_rate):.2f} {task.currency}/hr",
+                    f"{target_cost:.2f} {currency}",
+                    f"{round_cents(task.converted_hourly_rate(currency)):.2f} {currency}/hr",
+                    f"1 {task.currency} = {round_cents(task.exchange_rate(currency)):.2f} {currency}",
+                )
+
+    # Add a separator
+    table.add_row("", "", "", "", "", "", "", "", "", end_section=True)
+
+    # Add the total row with bold style
+    table.add_row(
+        "Total",
+        "",
+        "",
+        f"{total_hours:.2f}",
+        f"{total_source_cost:.2f}",
+        "",
+        f"{total_target_cost:.2f}",
+        "",
+        "",
+        style="bold",
+    )
+
+    console.print(table)

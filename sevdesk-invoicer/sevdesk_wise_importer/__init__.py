@@ -173,6 +173,8 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["description"]
             elif t == "CARD":
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
+            elif t == "CONVERSION":  # seen if converting currency in account
+                payee_payer_name = "Wise"
             else:
                 payee_payer_name = wise_transaction["details"].get("senderName")
                 if payee_payer_name is None:
@@ -188,6 +190,8 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["recipient"]["name"]
             elif t == "CARD":
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
+            elif t == "CONVERSION":  # seen if converting currency in account
+                payee_payer_name = "Wise"
             elif t == "ACCRUAL_CHARGE":  # seen for some fees sometimes
                 payee_payer_name = "Wise"
             elif t == "UNKNOWN":  # seen only for initial account purchase so far

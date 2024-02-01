@@ -194,6 +194,8 @@ def import_statements(
                 payee_payer_name = "Wise"
             elif t == "ACCRUAL_CHARGE":  # seen for some fees sometimes
                 payee_payer_name = "Wise"
+            elif t == "CARD_ORDER_CHECKOUT":
+                payee_payer_name = "Wise"  # Seen when ordering a credit card
             elif t == "UNKNOWN":  # seen only for initial account purchase so far
                 payee_payer_name = "Wise"
             elif (

@@ -81,13 +81,6 @@ def parse_args() -> argparse.Namespace:
         help="Target currency to convert to, i.e EUR",
     )
     parser.add_argument(
-        "--country",
-        default=None,
-        type=str,
-        choices=("UK", "CH"),
-        help="Numtide UK/Numtide CH",
-    )
-    parser.add_argument(
         "--format",
         default="humanreadable",
         choices=("humanreadable", "csv", "json", "table"),
@@ -116,12 +109,6 @@ def parse_args() -> argparse.Namespace:
         args.start = end_of_previous_month.strftime("%Y%m01")
         args.end = end_of_previous_month.strftime("%Y%m%d")
 
-    if args.client and args.country:
-        print("--client and --country flag conflict", file=sys.stderr)
-        sys.exit(1)
-    if args.agency != "numtide" and args.country:
-        print("Only Numtide can have a country", file=sys.stderr)
-        sys.exit(1)
     if args.agency == "none" and not args.client:
         print("--client must be passed if agency is disabled", file=sys.stderr)
         sys.exit(1)
@@ -136,9 +123,6 @@ def exclude_task(task: Task, args: argparse.Namespace) -> bool:
     if args.client:
         return True
 
-    # Only export internal projects if --country is passed and matches
-    if args.country:
-        return args.country != task.country_code
     return task.is_external
 
 

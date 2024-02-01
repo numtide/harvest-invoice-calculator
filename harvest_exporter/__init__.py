@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import re
 import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
@@ -26,7 +25,6 @@ class Task:
     cost: Fraction = Fraction(0)
     hourly_rate: Fraction = Fraction(0)
     currency: str = ""
-    country_code: str = ""
     is_external: bool = False
 
     def exchange_rate(self, currency: str) -> Fraction:
@@ -42,12 +40,7 @@ class Task:
     def agency(self) -> str:
         if self.is_external:
             return "none"
-        elif self.country_code == "UK":
-            return "Numtide Ltd."
-        elif self.country_code == "CH":
-            return "Numtide Sàrl"
-        else:
-            raise Exception(f"Unknown country code: {self.country_code}")
+        return "Numtide Sàrl"
 
 
 class Client:
@@ -68,20 +61,6 @@ class User:
             client.sort()
 
 
-def get_numtide_country(entry: Dict[str, Any]) -> str:
-    name = entry["project"]["name"]
-    # Parse the numtide country code from the project name
-    m = re.match(r".+ - (UK|CH)$", name)
-    if m is None:
-        print(
-            f"WARNING, project name {name} does not contain a country code. Assuming UK",
-            file=sys.stderr,
-        )
-        return "UK"
-    else:
-        return m.group(1)
-
-
 def process_entry(
     entry: Dict[str, Any],
     users: Dict[str, User],
@@ -94,12 +73,9 @@ def process_entry(
     )
 
     if is_external:
-        # External projects don't have a country code
-        country_code = "Unset"
         client_name = entry["project"]["name"]
         project_name = ""
     else:
-        country_code = get_numtide_country(entry)
         client_name = entry["client"]["name"]
         project_name = entry["project"]["name"]
 
@@ -127,11 +103,6 @@ def process_entry(
     rounded_hours = Fraction(entry["rounded_hours"])
     task.rounded_hours += rounded_hours
     task.is_external = is_external
-    if task.country_code == "":
-        task.country_code = country_code
-    else:
-        msg = f"Country code of customer changed from {task.country_code} to {country_code} within the billing period. This is not supported!"
-        assert task.country_code == country_code, msg
 
     if task.currency == "":
         task.currency = entry["client"]["currency"]

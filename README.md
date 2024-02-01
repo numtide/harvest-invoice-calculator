@@ -35,13 +35,6 @@ harvest-exporter --month 3
 harvest-exporter --user "Hans Maier"
 ```
 
-* Filter by country (UK/CH)
-
-``` console
-harvest-exporter --country UK
-harvest-exporter --country CH
-```
-
 * Generate using json output
 
 ```console

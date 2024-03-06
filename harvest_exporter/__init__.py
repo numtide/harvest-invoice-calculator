@@ -73,11 +73,8 @@ def get_numtide_country(entry: Dict[str, Any]) -> str:
     # Parse the numtide country code from the project name
     m = re.match(r".+ - (UK|CH)$", name)
     if m is None:
-        print(
-            f"WARNING, project name {name} does not contain a country code. Assuming UK",
-            file=sys.stderr,
-        )
-        return "UK"
+        # Assume CH by default
+        return "CH"
     else:
         return m.group(1)
 

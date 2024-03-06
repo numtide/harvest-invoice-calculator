@@ -82,12 +82,13 @@ def process_entry(
     if hourly_rate is not None:
         rate = hourly_rate
     else:
-        rate = entry["task_assignment"]["hourly_rate"]
+        rate = entry["billable_rate"]
         if rate == 0 or rate is None:
-            print(
-                f"WARNING, hourly rate for {client_name}/{project_name}/{task_name} is 0.0, skip for export",
-                file=sys.stderr,
-            )
+            if entry["billable"]:
+                print(
+                    f"WARNING, hourly rate for {client_name}/{project_name}/{task_name} is 0.0, skip for export",
+                    file=sys.stderr,
+                )
             return
 
     task = users[entry["user"]["name"]].clients[client_name].tasks[task_name]

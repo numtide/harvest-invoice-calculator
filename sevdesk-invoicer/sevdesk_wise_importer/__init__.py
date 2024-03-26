@@ -115,7 +115,13 @@ def import_statements(
     #         mapped to invoice and vouchers when imported if possible. Default: 1.
     currency = statements["query"]["currency"]
 
-    bank = statements["bankDetails"][0]
+    # It is possible that the bank statement does not contain any bank details and transactions, in that case we skip the statement
+    bankDetails = statements["bankDetails"]
+    if len(bankDetails) == 0 and len(statements["transactions"]) == 0:
+        print("Expected at least one bank in bank statement found none. Skipping.")
+        return
+
+    bank = bankDetails[0]
     if len(bank["accountNumbers"]) != 1:
         die(
             f"Expected exactly one account number in bank statement found: {statements['bankDetails']['accountNumbers']}"

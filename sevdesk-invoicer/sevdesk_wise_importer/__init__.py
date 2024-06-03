@@ -21,6 +21,9 @@ from sevdesk.client.models.check_account_model import (
     CheckAccountModelStatus,
     CheckAccountModelType,
 )
+from sevdesk.client.models.check_account_response_model import (
+    CheckAccountResponseModelType,
+)
 from sevdesk.client.models.check_account_transaction_model import (
     CheckAccountTransactionModel,
 )
@@ -63,7 +66,8 @@ def get_or_create_account(client: Client, name: str, currency: str) -> int:
     res = get_check_accounts.sync(client=client)
     if res is not None and res.objects is not Unset:
         for obj in res.objects:
-            if obj.name == name:
+            # We only want to return accounts that are not registers (German KASSE)
+            if obj.name == name and obj.type != CheckAccountResponseModelType.REGISTER:
                 return obj.id
     account = CheckAccountModel(
         name=name,

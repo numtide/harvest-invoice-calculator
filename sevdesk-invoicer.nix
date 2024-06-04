@@ -6,7 +6,7 @@ pkgs.python3.pkgs.buildPythonApplication {
   pname = "sevdesk-invoicer";
   version = "0.0.1";
   src = ./sevdesk-invoicer;
-  format = "pyproject";
+  pyproject = true;
   propagatedBuildInputs = [
     sevdesk
   ];

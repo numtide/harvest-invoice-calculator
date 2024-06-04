@@ -6,8 +6,6 @@ pkgs.python3.pkgs.buildPythonApplication rec {
 
   src = ./quipu;
 
-  format = "pyproject";
-
   propagatedBuildInputs = with pkgs.python3.pkgs; [
     click
     click-option-group

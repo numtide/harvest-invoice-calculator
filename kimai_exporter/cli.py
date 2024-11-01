@@ -139,15 +139,12 @@ def main() -> None:
             args.kimai_api_key, args.start, args.end, user["id"], project["id"]
         )
         timesheets[project["name"]] = entries
-        
+
     time_per_project = {}
     for project, entries in timesheets.items():
         total_seconds = sum(entry["duration"] for entry in entries)
         hours = total_seconds / 3600
-        time_per_project[project] = {
-            "hours": hours
-        }
-
+        time_per_project[project] = {"hours": hours}
 
     breakpoint()
     agency_rate = None

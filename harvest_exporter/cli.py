@@ -6,6 +6,7 @@ import os
 import sys
 from datetime import date, datetime, timedelta
 from fractions import Fraction
+from typing import Tuple
 
 from harvest import get_time_entries
 
@@ -59,10 +60,11 @@ def parse_args() -> argparse.Namespace:
         help="End date i.e. 20220101",
     )
     parser.add_argument(
-        "--month",
+        "--months",
         type=int,
+        nargs="+",
         choices=range(1, 13),
-        help="Month to generate report for (conflicts with `--start` and `--end`)",
+        help="Months to generate report for (conflicts with `--start` and `--end`)",
     )
     parser.add_argument(
         "--year",
@@ -89,16 +91,18 @@ def parse_args() -> argparse.Namespace:
     )
     args = parser.parse_args()
     today = datetime.today()
-    if args.month and (args.start or args.end):
-        print("--month flag conflicts with --start and --end", file=sys.stderr)
+
+    # Handle date range logic
+    if args.months and (args.start or args.end):
+        print("--months flag conflicts with --start and --end", file=sys.stderr)
         sys.exit(1)
-    if args.month:
-        year = today.year
-        if args.year:
-            year = args.year
-        _, last_day = calendar.monthrange(year, args.month)
-        args.start = date(year, args.month, 1).strftime("%Y%m%d")
-        args.end = date(year, args.month, last_day).strftime("%Y%m%d")
+
+    if args.months:
+        year = args.year if args.year else today.year
+        # Sort months to ensure chronological order
+        months = sorted(args.months)
+        args.start = get_month_range(year, months[0])[0]
+        args.end = get_month_range(year, months[-1])[1]
     elif (args.start and not args.end) or (args.end and not args.start):
         print("both --start and --end flag must be passed", file=sys.stderr)
         sys.exit(1)
@@ -114,6 +118,14 @@ def parse_args() -> argparse.Namespace:
         sys.exit(1)
 
     return args
+
+
+def get_month_range(year: int, month: int) -> Tuple[str, str]:
+    """Get the start and end dates for a given month and year."""
+    _, last_day = calendar.monthrange(year, month)
+    start = date(year, month, 1).strftime("%Y%m%d")
+    end = date(year, month, last_day).strftime("%Y%m%d")
+    return start, end
 
 
 def exclude_task(task: Task, args: argparse.Namespace) -> bool:

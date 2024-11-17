@@ -28,3 +28,6 @@ export HARVEST_PASSWORD=""
 # To use quipu_invoicer
 #export QUIPU_APP_ID=<TODO>
 #export QUIPU_APP_SECRET=<TODO>
+
+#export KIMAI_API_KEY="<TODO>"
+#export KIMAI_API_URL="http://127.0.0.1:8001"

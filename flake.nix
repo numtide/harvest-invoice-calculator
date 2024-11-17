@@ -49,6 +49,8 @@
                 "harvest_exporter"
                 "harvest_report"
                 "rest"
+                "kimai"
+                "kimai_exporter"
               ];
               "sevdesk-invoicer" = { };
               "wise-exporter" = {

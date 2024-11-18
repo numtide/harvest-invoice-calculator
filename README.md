@@ -82,6 +82,14 @@ $ working-days-calculator report.csv
 Working days: 171 from 2022-01-12 00:00:00 to 2022-12-29 00:00:00
 ```
 
+## Kimai Usage/Examples
+
+Exports the last month timesheets of user Jon for client Bob  
+```
+./bin/kimai-exporter --client Bob --user Jon
+```
+
+
 ## API References
 
 * [Harvest](https://help.getharvest.com/api-v2)

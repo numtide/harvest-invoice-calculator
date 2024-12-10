@@ -1,5 +1,6 @@
 [tool.ruff]
 line-length = 88
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -40,6 +41,8 @@ ignore = [
   "S607",
   # Boolean default positional argument in function definition
   "FBT002",
+
+  "S310", # Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
 
   # Too many statements
   "PLR0915",

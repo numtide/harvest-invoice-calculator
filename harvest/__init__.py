@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from typing import Any, Dict, List
+from typing import Any
 
 from rest import http_request
 
 
 def get_time_entries(
     account_id: str, access_token: str, from_date: int, to_date: int
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Harvest-Account-id": account_id,

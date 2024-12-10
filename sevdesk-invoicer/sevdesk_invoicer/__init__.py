@@ -2,6 +2,7 @@
 
 # This script is currently only used by Jörg, in case someone else is also interested in using it,
 # we can make it more flexible.
+from __future__ import annotations
 
 import argparse
 import json
@@ -9,6 +10,7 @@ import os
 import sys
 from datetime import datetime
 from fractions import Fraction
+from pathlib import Path
 from typing import Any
 
 from sevdesk import Client
@@ -60,13 +62,13 @@ def get_contact_by_name(client: Client, name: str) -> Contact:
     contacts = response.parsed.objects
     assert isinstance(contacts, list)
     if len(contacts) == 0:
-        raise ValueError(
-            f"Could not find customer with name {name}. Please create it first in contacts."
-        )
+        msg = f"Could not find customer with name {name}. Please create it first in contacts."
+        raise ValueError(msg)
     if len(contacts) > 1:
-        ids = " ".join(map(lambda c: c.customer_number, contacts))
-        raise ValueError(f"Found multiple customers with name: {ids}")
-    return Contact._from_contact_model(client, contacts[0])
+        ids = " ".join(c.customer_number for c in contacts)
+        msg = f"Found multiple customers with name: {ids}"
+        raise ValueError(msg)
+    return Contact._from_contact_model(client, contacts[0])  # noqa: SLF001
 
 
 def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
@@ -85,10 +87,7 @@ def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
     text = ""
     if task["source_currency"] != task["target_currency"]:
         text = f"{task['source_currency']} {original_price} x {float(task['exchange_rate'])} = {task['target_currency']} {price}"
-    if has_agency:
-        name = f"{task['client']} - {task['task']}"
-    else:
-        name = task["task"]
+    name = f"{task['client']} - {task['task']}" if has_agency else task["task"]
     return LineItem(
         name=name,
         unity=Unity.HOUR,
@@ -120,9 +119,7 @@ def create_invoice(
         billing_target = agency
     else:
         billing_target = tasks[0]["client"]
-    items = []
-    for task in tasks:
-        items.append(line_item(task, has_agency))
+    items = [line_item(task, has_agency) for task in tasks]
 
     customer = get_contact_by_name(client, billing_target)
 
@@ -146,14 +143,12 @@ def create_invoice(
         invoice.payment_method = payment_method
 
     invoice.create(client)
-    pass
 
 
 def main() -> None:
     args = parse_args()
     if args.json_file:
-        with open(args.json_file) as f:
-            tasks = json.load(f)
+        tasks = json.loads(Path(args.json_file).read_text())
     else:
         tasks = json.load(sys.stdin)
     create_invoice(

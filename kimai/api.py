@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from kimai.data import (
     ActivityInfo,
@@ -19,8 +19,8 @@ class KimaiAPI:
     api_url: str
 
     def kimai_request(
-        self, endpoint: str, data: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, endpoint: str, data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         data["page"] = 1
         headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -42,32 +42,32 @@ class KimaiAPI:
 
         return all_entries
 
-    def get_visible_projects(self, billable: bool = False) -> List[Dict[str, Any]]:
+    def get_visible_projects(self, billable: bool = False) -> list[dict[str, Any]]:
         endpoint = "/api/projects"
         data = {
             "visible": 1,
         }
         return self.kimai_request(endpoint, data)
 
-    def get_visible_users(self) -> List[Dict[str, Any]]:
+    def get_visible_users(self) -> list[dict[str, Any]]:
         endpoint = "/api/users"
         data = {
             "visible": 1,
         }
         return self.kimai_request(endpoint, data)
 
-    def get_customer(self, id: int) -> CustomerInfo:
-        endpoint = f"/api/customers/{id}"
+    def get_customer(self, customer_id: int) -> CustomerInfo:
+        endpoint = f"/api/customers/{customer_id}"
         custom_data = self.kimai_request(endpoint, {})
         return CustomerInfo.from_json(custom_data[0])
 
-    def get_user(self, id: int) -> UserInfo:
-        endpoint = f"/api/users/{id}"
+    def get_user(self, user_id: int) -> UserInfo:
+        endpoint = f"/api/users/{user_id}"
         user_data = self.kimai_request(endpoint, {})
         return UserInfo.from_json(user_data[0])
 
-    def get_activity(self, id: int) -> ActivityInfo:
-        endpoint = f"/api/activities/{id}"
+    def get_activity(self, activity_id: int) -> ActivityInfo:
+        endpoint = f"/api/activities/{activity_id}"
         activity_data = self.kimai_request(endpoint, {})
         return ActivityInfo.from_json(activity_data[0])
 
@@ -78,7 +78,7 @@ class KimaiAPI:
         user_id: int,
         customer_id: int,
         billable: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         endpoint = "/api/timesheets"
         data = {
             "user": user_id,
@@ -89,7 +89,7 @@ class KimaiAPI:
         }
         return self.kimai_request(endpoint, data)
 
-    def get_time_entry(self, id: int) -> TimeEntryFull:
-        endpoint = f"/api/timesheets/{id}"
+    def get_time_entry(self, entry_id: int) -> TimeEntryFull:
+        endpoint = f"/api/timesheets/{entry_id}"
         entry_data = self.kimai_request(endpoint, {})
         return TimeEntryFull.from_json(entry_data[0])

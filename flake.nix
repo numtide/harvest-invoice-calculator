@@ -1,7 +1,7 @@
 {
   description = "Flake utils demo";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/master";
+  inputs.nixpkgs.url = "git+https://github.com/NixOS/nixpkgs?shallow=1&ref=nixpkgs-unstable";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
@@ -23,6 +23,7 @@
         packages = {
           harvest-exporter = pkgs.callPackage ./harvest-exporter.nix { };
           harvest-report = pkgs.callPackage ./harvest-report.nix { };
+
           wise-exporter = pkgs.callPackage ./wise-exporter.nix { };
           sevdesk-invoicer = pkgs.callPackage ./sevdesk-invoicer.nix { };
           sevdesk = pkgs.python3.pkgs.callPackage ./sevdesk.nix { };
@@ -60,6 +61,9 @@
             };
           };
 
+          programs.ruff.format = true;
+          programs.ruff.check = true;
+
           settings.formatter = {
             nix = {
               command = "sh";
@@ -75,18 +79,6 @@
                 "--"
               ];
               includes = [ "*.nix" ];
-            };
-            python = {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
-                  ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
-                ''
-                "--" # this argument is ignored by bash
-              ];
-              includes = [ "*.py" ];
             };
           };
         };

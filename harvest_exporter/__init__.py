@@ -4,7 +4,7 @@ import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .transferwise import exchange_rate
 
@@ -45,7 +45,7 @@ class Task:
 
 class Client:
     def __init__(self) -> None:
-        self.tasks: Dict[str, Task] = defaultdict(Task)
+        self.tasks: dict[str, Task] = defaultdict(Task)
 
     def sort(self) -> None:
         self.tasks = OrderedDict(sorted(self.tasks.items()))
@@ -53,7 +53,7 @@ class Client:
 
 class User:
     def __init__(self) -> None:
-        self.clients: Dict[str, Client] = defaultdict(Client)
+        self.clients: dict[str, Client] = defaultdict(Client)
 
     def sort(self) -> None:
         self.clients = OrderedDict(sorted(self.clients.items()))
@@ -62,10 +62,10 @@ class User:
 
 
 def process_entry(
-    entry: Dict[str, Any],
-    users: Dict[str, User],
-    hourly_rate: Optional[Fraction],
-    agency_rate: Optional[Fraction],
+    entry: dict[str, Any],
+    users: dict[str, User],
+    hourly_rate: Fraction | None,
+    agency_rate: Fraction | None,
 ) -> None:
     task_name = entry["task"]["name"]
     is_external = (
@@ -114,14 +114,14 @@ def process_entry(
 
 
 def aggregate_time_entries(
-    entries: List[Dict[str, Any]],
-    hourly_rate: Optional[Fraction],
-    agency_rate: Optional[Fraction],
-) -> Dict[str, User]:
-    users: Dict[str, User] = defaultdict(User)
+    entries: list[dict[str, Any]],
+    hourly_rate: Fraction | None,
+    agency_rate: Fraction | None,
+) -> dict[str, User]:
+    users: dict[str, User] = defaultdict(User)
     for entry in entries:
         process_entry(entry, users, hourly_rate, agency_rate)
 
-    for _, user in users.items():
+    for user in users.values():
         user.sort()
     return OrderedDict(sorted(users.items()))

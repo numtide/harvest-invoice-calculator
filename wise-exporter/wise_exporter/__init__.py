@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import argparse
 import base64
@@ -29,9 +30,7 @@ class Signer:
 
         # Encode the signed message as friendly base64 format for HTTP
         # headers.
-        signature = base64.b64encode(signed_token).decode("ascii")
-
-        return signature
+        return base64.b64encode(signed_token).decode("ascii")
 
 
 class Balance:
@@ -49,9 +48,11 @@ class WiseClient:
         self,
         url: str,
         method: str = "GET",
-        headers: dict[str, str] = {},
+        headers: dict[str, str] | None = None,
         data: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[dict[str, Any]]:
+        if headers is None:
+            headers = {}
         body = None
         if data:
             body = json.dumps(data).encode("ascii")
@@ -64,24 +65,23 @@ class WiseClient:
         self,
         path: str,
         method: str = "GET",
-        headers: dict[str, str] = {},
+        headers: dict[str, str] | None = None,
         data: dict[str, Any] | None = None,
     ) -> dict[str, Any] | list[dict[str, Any]]:
+        if headers is None:
+            headers = {}
         headers["Authorization"] = f"Bearer {self.api_key}"
         headers["Content-Type"] = "application/json"
         headers["User-Agent"] = "Numtide wise importer"
         try:
             return self._http_request(f"{BASE_URL}/{path}", method, headers, data)
         except urllib.error.HTTPError as e:
-            if e.code == 403:
-                if "x-2fa-approval" in e.headers:
-                    one_time_token = e.headers["x-2fa-approval"]
-                    headers["x-2fa-approval"] = one_time_token
-                    headers["X-Signature"] = self.signer.sca_challenge(one_time_token)
-                    return self._http_request(
-                        f"{BASE_URL}/{path}", method, headers, data
-                    )
-            raise e
+            if e.code == 403 and "x-2fa-approval" in e.headers:
+                one_time_token = e.headers["x-2fa-approval"]
+                headers["x-2fa-approval"] = one_time_token
+                headers["X-Signature"] = self.signer.sca_challenge(one_time_token)
+                return self._http_request(f"{BASE_URL}/{path}", method, headers, data)
+            raise
 
     def get_buisness_profile(self) -> int:
         r = self.http_request("/v2/profiles")

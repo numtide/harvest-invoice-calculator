@@ -6,6 +6,7 @@ import mimetypes
 import os
 from datetime import datetime
 from io import BufferedReader
+from pathlib import Path
 from typing import Any
 from urllib import parse, request
 
@@ -74,7 +75,7 @@ def val_or_unset(val: Any) -> Any:
 
 def upload_file(file: BufferedReader, api_token: str) -> None:
     client = Client(base_url="https://my.sevdesk.de/api/v1", token=api_token)
-    name = os.path.basename(file.name)
+    name = Path(file.name).name
     f = File(payload=file, file_name=name, mime_type=mimetypes.guess_type(file.name)[0])
     res1 = voucher_upload_file.sync(
         client=client,
@@ -154,7 +155,7 @@ def main() -> None:
     for file in args.file:
         upload_file(file, args.sevdesk_api_token)
         if args.delete:
-            os.remove(file)
+            Path(file).unlink()
 
 
 if __name__ == "__main__":

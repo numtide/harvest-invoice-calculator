@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 import click
@@ -18,8 +21,7 @@ def load_invoice_data(
     ctx: click.Context, param: click.Parameter, value: str | None
 ) -> Any:
     if value is not None:
-        with open(value) as file:
-            return json.load(file)
+        return json.loads(Path(value).read_text())
     return None
 
 
@@ -63,7 +65,6 @@ def cli(ctx: click.Context, quipu_app_id: str, quipu_app_secret: str) -> None:
 @cli.group()
 def invoices() -> None:
     """Commands related to invoices."""
-    pass
 
 
 @invoices.command(name="list")
@@ -106,7 +107,6 @@ def edit_invoice(quipu_api: QuipuAPI, invoice_id: str, invoice_data: dict) -> No
 @cli.group()
 def contacts() -> None:
     """Commands related to contacts."""
-    pass
 
 
 @contacts.command(name="list")

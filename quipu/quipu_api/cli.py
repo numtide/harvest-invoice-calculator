@@ -63,7 +63,6 @@ def cli(ctx: click.Context, quipu_app_id: str, quipu_app_secret: str) -> None:
 @cli.group()
 def invoices() -> None:
     """Commands related to invoices."""
-    pass
 
 
 @invoices.command(name="list")
@@ -106,7 +105,6 @@ def edit_invoice(quipu_api: QuipuAPI, invoice_id: str, invoice_data: dict) -> No
 @cli.group()
 def contacts() -> None:
     """Commands related to contacts."""
-    pass
 
 
 @contacts.command(name="list")

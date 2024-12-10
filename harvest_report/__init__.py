@@ -37,8 +37,7 @@ def chatgpt(prompt: str, api_key: str) -> str:
     if response.status == 200:
         msg = json.loads(response.read())
         return msg["choices"][0]["message"]["content"]
-    else:
-        raise Exception(f"Error: {response.status} {response.reason}")
+    raise Exception(f"Error: {response.status} {response.reason}")
 
 
 def parse_args() -> argparse.Namespace:

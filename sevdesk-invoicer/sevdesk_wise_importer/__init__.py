@@ -200,9 +200,7 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["recipient"]["name"]
             elif t == "CARD":
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
-            elif t == "CONVERSION":  # seen if converting currency in account
-                payee_payer_name = "Wise"
-            elif t == "ACCRUAL_CHARGE":  # seen for some fees sometimes
+            elif t == "CONVERSION" or t == "ACCRUAL_CHARGE":  # seen if converting currency in account
                 payee_payer_name = "Wise"
             elif t == "CARD_ORDER_CHECKOUT":
                 payee_payer_name = "Wise"  # Seen when ordering a credit card

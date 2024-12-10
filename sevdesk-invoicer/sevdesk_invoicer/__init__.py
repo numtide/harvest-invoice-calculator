@@ -146,7 +146,6 @@ def create_invoice(
         invoice.payment_method = payment_method
 
     invoice.create(client)
-    pass
 
 
 def main() -> None:

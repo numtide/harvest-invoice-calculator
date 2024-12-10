@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from fractions import Fraction
+from typing import TYPE_CHECKING
 
 from kimai.data import JsonSerializable
+
+if TYPE_CHECKING:
+    from fractions import Fraction
 
 
 @dataclass

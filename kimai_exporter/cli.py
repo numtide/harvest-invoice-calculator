@@ -17,6 +17,10 @@ from kimai.jsonserializer import JsonEncoder
 from . import ProjectReport
 
 
+class Error(Exception):
+    pass
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -125,9 +129,11 @@ def main() -> None:
         )
     )
     if len(users_data) < 1:
-        raise Exception(f"User {args.user} not found")
+        msg = f"User {args.user} not found"
+        raise Error(msg)
     if len(users_data) > 1:
-        raise Exception(f"Multiple users found for {args.user}")
+        msg = f"Multiple users found for {args.user}"
+        raise Error(msg)
     user = UserInfo.from_json(users_data[0])
 
     all_reports: list[ProjectReport] = []

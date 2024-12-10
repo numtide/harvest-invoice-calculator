@@ -14,10 +14,15 @@ from datetime import date, datetime
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from pathlib import Path
 from string import Template
 from typing import Any
 
 from harvest import get_time_entries
+
+
+class Error(Exception):
+    pass
 
 
 def chatgpt(prompt: str, api_key: str) -> str:
@@ -37,7 +42,8 @@ def chatgpt(prompt: str, api_key: str) -> str:
     if response.status == 200:
         msg = json.loads(response.read())
         return msg["choices"][0]["message"]["content"]
-    raise Exception(f"Error: {response.status} {response.reason}")
+    msg = f"Error: {response.status} {response.reason}"
+    raise Error(msg)
 
 
 def parse_args() -> argparse.Namespace:
@@ -222,10 +228,7 @@ def save_to_drafts(args: argparse.Namespace, report: bytes) -> None:
         message["Subject"] = subject
         message.attach(MIMEText(args.mail_body, "plain"))
 
-        if args.format == "html":
-            name = "report.html"
-        else:  # args.format == "pdf":
-            name = "report.pdf"
+        name = "report.html" if args.format == "html" else "report.pdf"
 
         part = MIMEApplication(report, Name=name)
         # After the file is closed
@@ -358,13 +361,13 @@ def main() -> None:
         )
         output = res.stdout
     else:
-        raise RuntimeError("Invalid format")
+        msg = "Invalid format"
+        raise RuntimeError(msg)
 
     if args.imap_host:
         save_to_drafts(args, output)
     elif args.output:
-        with open(args.output, "wb") as f:
-            f.write(output)
+        Path(args.output).write_bytes(output)
     else:
         sys.stdout.buffer.write(output)
 

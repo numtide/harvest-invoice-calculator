@@ -120,12 +120,12 @@ def import_statements(
     currency = statements["query"]["currency"]
 
     # It is possible that the bank statement does not contain any bank details and transactions, in that case we skip the statement
-    bankDetails = statements["bankDetails"]
-    if len(bankDetails) == 0 and len(statements["transactions"]) == 0:
+    bank_details = statements["bankDetails"]
+    if len(bank_details) == 0 and len(statements["transactions"]) == 0:
         print("Expected at least one bank in bank statement found none. Skipping.")
         return
 
-    bank = bankDetails[0]
+    bank = bank_details[0]
     if len(bank["accountNumbers"]) != 1:
         die(
             f"Expected exactly one account number in bank statement found: {statements['bankDetails']['accountNumbers']}"
@@ -136,10 +136,10 @@ def import_statements(
     account_id = get_or_create_account(client, name, currency)
     datetime.datetime.strptime(
         statements["query"]["intervalStart"], "%Y-%m-%dT%H:%M:%SZ"
-    ).replace(tzinfo=datetime.timezone.utc)
+    ).replace(tzinfo=datetime.UTC)
     datetime.datetime.strptime(
         statements["query"]["intervalEnd"], "%Y-%m-%dT%H:%M:%S.%fZ"
-    ).replace(tzinfo=datetime.timezone.utc)
+    ).replace(tzinfo=datetime.UTC)
 
     if import_state_file.exists():
         imported_transactions = set(json.loads(import_state_file.read_text()))
@@ -179,7 +179,7 @@ def import_statements(
 
         t = wise_transaction["details"]["type"]
         if wise_transaction["type"] == "CREDIT":
-            if t == "MONEY_ADDED" or t == "UNKNOWN":
+            if t in ("MONEY_ADDED", "UNKNOWN"):
                 payee_payer_name = wise_transaction["details"]["description"]
             elif t == "CARD":
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
@@ -200,7 +200,10 @@ def import_statements(
                 payee_payer_name = wise_transaction["details"]["recipient"]["name"]
             elif t == "CARD":
                 payee_payer_name = wise_transaction["details"]["merchant"]["name"]
-            elif t == "CONVERSION" or t == "ACCRUAL_CHARGE":  # seen if converting currency in account
+            elif t in (
+                "CONVERSION",
+                "ACCRUAL_CHARGE",
+            ):  # seen if converting currency in account
                 payee_payer_name = "Wise"
             elif t == "CARD_ORDER_CHECKOUT":
                 payee_payer_name = "Wise"  # Seen when ordering a credit card
@@ -222,7 +225,7 @@ def import_statements(
         )
         date = datetime.datetime.strptime(
             wise_transaction["date"], "%Y-%m-%dT%H:%M:%S.%fZ"
-        ).replace(tzinfo=datetime.timezone.utc)
+        ).replace(tzinfo=datetime.UTC)
         transaction = CheckAccountTransactionModel(
             check_account=CheckAccountTransactionModelCheckAccount(
                 id=account_id, object_name="CheckAccount"
@@ -242,8 +245,7 @@ def import_statements(
 def main() -> None:
     args = parse_args()
     if args.json_file:
-        with open(args.json_file) as f:
-            statements_per_account = json.load(f)
+        statements_per_account = json.loads(Path(args.json_file).read_text())
     else:
         statements_per_account = json.load(sys.stdin)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import logging
 from dataclasses import dataclass, field
@@ -27,7 +29,7 @@ class QuipuResponse:
     errors: list[dict[str, Any]] | None = field(default_factory=list)
     links: dict[str, str] | None = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {
             "data": self.data,
             "meta": self.meta,
@@ -37,7 +39,7 @@ class QuipuResponse:
 
 
 class QuipuAPI:
-    def __init__(self, app_id: str, app_secret: str):
+    def __init__(self, app_id: str, app_secret: str) -> None:
         self._base_url = "https://getquipu.com/"
         self._app_id = app_id
         self._app_secret = app_secret
@@ -68,22 +70,24 @@ class QuipuAPI:
                 token_endpoint,
                 headers=headers,
                 data={"scope": "ecommerce", "grant_type": "client_credentials"},
+                timeout=20,
             )
             response.raise_for_status()
             self._token = response.json()["access_token"]
             self._headers["Authorization"] = f"Bearer {self._token}"
-        except requests.RequestException as e:
-            self.log.error(f"Failed to get token: {e}")
+        except requests.RequestException:
+            self.log.exception("Failed to get token")
             raise
 
     def _try_refresh_token(self) -> bool:
         """Attempt to refresh the authentication token."""
         try:
             self._get_token()
-            return True
         except requests.RequestException:
             self.log.warning("Failed to refresh token.")
             return False
+        else:
+            return True
 
     def _make_request(
         self,
@@ -101,25 +105,30 @@ class QuipuAPI:
             response = None
             try:
                 response = requests.request(
-                    method, url, headers=self._headers, json=data, params=params
+                    method,
+                    url,
+                    headers=self._headers,
+                    json=data,
+                    params=params,
+                    timeout=20,
                 )
                 response.raise_for_status()
                 self.log.debug(f"Response from {method} {url}: {response.text}")
                 return QuipuResponse(**response.json())
-            except requests.HTTPError as http_err:
-                self.log.error(f"HTTP error for {method} {url}: {http_err}")
+            except requests.HTTPError:
+                self.log.exception(f"HTTP error for {method} {url}")
                 if (
                     response
                     and response.status_code == 401
                     and attempts < max_retries - 1
                 ):
                     if not self._try_refresh_token():
-                        raise http_err
+                        raise
                 else:
-                    raise http_err
-            except requests.RequestException as req_err:
-                self.log.error(f"Request error for {method} {url}: {req_err}")
-                raise req_err
+                    raise
+            except requests.RequestException:
+                self.log.exception(f"Request error for {method} {url}")
+                raise
 
             logging.warning(
                 f"Retrying {method} request to {endpoint}. Attempt {attempts + 1}/{max_retries}."
@@ -127,7 +136,8 @@ class QuipuAPI:
             sleep(2**attempts)  # Exponential backoff
             attempts += 1
 
-        raise RuntimeError("Maximum retry attempts reached")
+        msg = "Maximum retry attempts reached"
+        raise RuntimeError(msg)
 
     def _get(self, endpoint: str, params: dict | None = None) -> QuipuResponse:
         return self._make_request("GET", endpoint, params=params)
@@ -149,11 +159,13 @@ class QuipuAPI:
         endpoint = f"invoices/{invoice_id}"
         return self._get(endpoint)
 
-    def create_invoice(self, invoice_data):
+    def create_invoice(self, invoice_data: dict) -> QuipuResponse | None:
         endpoint = "invoices"
         return self._post(endpoint, invoice_data)
 
-    def update_invoice(self, invoice_id: str, update_data):
+    def update_invoice(
+        self, invoice_id: str, update_data: dict
+    ) -> QuipuResponse | None:
         endpoint = f"invoices/{invoice_id}"
         return self._patch(endpoint, data=update_data)
 

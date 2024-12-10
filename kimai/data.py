@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from kimai.jsonserializer import JsonSerializable
 
 T = TypeVar("T", bound="JsonSerializable")
+
+# ruff: noqa: N815
 
 
 @dataclass
@@ -13,11 +15,11 @@ class UserInfo(JsonSerializable):
     initials: str
     id: int
     alias: str
-    title: Optional[str]
+    title: str | None
     username: str
-    accountNumber: Optional[str]
+    accountNumber: str | None
     enabled: bool
-    color: Optional[str]
+    color: str | None
 
 
 @dataclass
@@ -25,26 +27,26 @@ class CustomerInfo(JsonSerializable):
     id: int
     name: str
     number: str
-    comment: Optional[str]
+    comment: str | None
     visible: bool
     billable: bool
-    company: Optional[str]
-    vatId: Optional[str]
-    contact: Optional[str]
-    address: Optional[str]
+    company: str | None
+    vatId: str | None
+    contact: str | None
+    address: str | None
     country: str
     currency: str
-    phone: Optional[str]
-    fax: Optional[str]
-    mobile: Optional[str]
-    email: Optional[str]
-    homepage: Optional[str]
+    phone: str | None
+    fax: str | None
+    mobile: str | None
+    email: str | None
+    homepage: str | None
     timezone: str
     metaFields: list
     teams: list
     budget: float
     timeBudget: float
-    budgetType: Optional[str]
+    budgetType: str | None
     color: str
 
 
@@ -55,8 +57,8 @@ class ProjectInfo(JsonSerializable):
     id: int
     name: str
     start: str
-    end: Optional[str]
-    comment: Optional[str]
+    end: str | None
+    comment: str | None
     visible: bool
     billable: bool
     metaFields: list
@@ -76,7 +78,7 @@ class TimeEntry(JsonSerializable):
     begin: str
     end: str
     duration: Fraction
-    description: Optional[str]
+    description: str | None
     rate: Fraction
     internalRate: Fraction
     exported: bool
@@ -94,7 +96,7 @@ class TimeEntryFull(JsonSerializable):
     begin: str
     end: str
     duration: Fraction
-    description: Optional[str]
+    description: str | None
     rate: Fraction
     hourlyRate: Fraction
     internalRate: Fraction
@@ -105,11 +107,11 @@ class TimeEntryFull(JsonSerializable):
 
 @dataclass
 class ActivityInfo(JsonSerializable):
-    parentTitle: Optional[str]
-    project: Optional[int]
+    parentTitle: str | None
+    project: int | None
     id: int
     name: str
-    comment: Optional[str]
+    comment: str | None
     visible: bool
     billable: bool
     metaFields: list
@@ -117,5 +119,5 @@ class ActivityInfo(JsonSerializable):
     number: str
     budget: float
     timeBudget: float
-    budgetType: Optional[str]
+    budgetType: str | None
     color: str

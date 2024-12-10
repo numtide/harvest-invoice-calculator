@@ -18,10 +18,11 @@ class JsonSerializable:
     def from_json(cls: type[T], data: dict) -> T:
         # Ensure cls is a dataclass
         if not hasattr(cls, "__dataclass_fields__"):
-            raise TypeError(f"{cls.__name__} is not a dataclass")
+            msg = f"{cls.__name__} is not a dataclass"
+            raise TypeError(msg)
 
         # Get the field names and types of the dataclass
-        cls_fields = {f.name: f.type for f in fields(cls)}  # type: ignore
+        cls_fields = {f.name: f.type for f in fields(cls)}  # type: ignore[attr-defined]
 
         # Filter out any fields in the JSON that are not present in the dataclass
         filtered_data = {}

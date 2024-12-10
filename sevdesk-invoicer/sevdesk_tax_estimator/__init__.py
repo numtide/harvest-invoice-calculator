@@ -4,9 +4,14 @@ from decimal import Decimal
 from pathlib import Path
 
 
+class Error(Exception):
+    pass
+
+
 def convert_to_decimal(value: str) -> Decimal:
     if "," not in value:
-        raise ValueError("Value should be in the format 10.1234,56")
+        msg = "Value should be in the format 10.1234,56"
+        raise ValueError(msg)
     return Decimal(value.replace(".", "").replace(",", "."))
 
 
@@ -50,8 +55,9 @@ def main() -> None:
         text = Path(file).read_text()
         try:
             data = json.loads(text)
-        except json.JSONDecodeError:
-            raise
+        except json.JSONDecodeError as e:
+            msg = f"Failed to parse {file}"
+            raise Error(msg) from e
         for entry in data:
             revenue += Decimal(entry["target_cost"])
 
@@ -61,8 +67,9 @@ def main() -> None:
         text = Path(file).read_text()
         try:
             data = json.loads(text)
-        except json.JSONDecodeError:
-            raise
+        except json.JSONDecodeError as e:
+            msg = f"Failed to parse {file}"
+            raise Error(msg) from e
         if "transactions" not in data[0]:
             continue
         for entry in data[0]["transactions"]:

@@ -2,15 +2,17 @@ import json
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 def http_request(
     url: str,
     method: str = "GET",
-    headers: dict[str, str] = {},
-    data: Optional[dict[str, Any]] = None,
+    headers: dict[str, str] | None = None,
+    data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if headers is None:
+        headers = {}
     body = None
     if data:
         body = json.dumps(data).encode("ascii")
@@ -31,9 +33,11 @@ class Response:
 def http_request2(
     url: str,
     method: str = "GET",
-    headers: dict[str, str] = {},
-    data: Optional[dict[str, Any]] = None,
+    headers: dict[str, str] | None = None,
+    data: dict[str, Any] | None = None,
 ) -> Response:
+    if headers is None:
+        headers = {}
     if method == "GET" and data:
         url += "?" + urllib.parse.urlencode(data)
         body = None

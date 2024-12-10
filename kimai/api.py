@@ -56,18 +56,18 @@ class KimaiAPI:
         }
         return self.kimai_request(endpoint, data)
 
-    def get_customer(self, id: int) -> CustomerInfo:
-        endpoint = f"/api/customers/{id}"
+    def get_customer(self, customer_id: int) -> CustomerInfo:
+        endpoint = f"/api/customers/{customer_id}"
         custom_data = self.kimai_request(endpoint, {})
         return CustomerInfo.from_json(custom_data[0])
 
-    def get_user(self, id: int) -> UserInfo:
-        endpoint = f"/api/users/{id}"
+    def get_user(self, user_id: int) -> UserInfo:
+        endpoint = f"/api/users/{user_id}"
         user_data = self.kimai_request(endpoint, {})
         return UserInfo.from_json(user_data[0])
 
-    def get_activity(self, id: int) -> ActivityInfo:
-        endpoint = f"/api/activities/{id}"
+    def get_activity(self, activity_id: int) -> ActivityInfo:
+        endpoint = f"/api/activities/{activity_id}"
         activity_data = self.kimai_request(endpoint, {})
         return ActivityInfo.from_json(activity_data[0])
 
@@ -89,7 +89,7 @@ class KimaiAPI:
         }
         return self.kimai_request(endpoint, data)
 
-    def get_time_entry(self, id: int) -> TimeEntryFull:
-        endpoint = f"/api/timesheets/{id}"
+    def get_time_entry(self, entry_id: int) -> TimeEntryFull:
+        endpoint = f"/api/timesheets/{entry_id}"
         entry_data = self.kimai_request(endpoint, {})
         return TimeEntryFull.from_json(entry_data[0])

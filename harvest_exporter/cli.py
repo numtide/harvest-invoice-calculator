@@ -162,8 +162,8 @@ def main() -> None:
             sys.exit(1)
         users = {args.user: for_user}
 
-    for _, user in users.items():
-        for _, client in user.clients.items():
+    for user in users.values():
+        for client in user.clients.values():
             to_delete = []
             for name, task in client.tasks.items():
                 if exclude_task(task, args):

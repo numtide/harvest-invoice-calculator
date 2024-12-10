@@ -4,7 +4,7 @@ import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Any, Optional
+from typing import Any
 
 from .transferwise import exchange_rate
 
@@ -64,8 +64,8 @@ class User:
 def process_entry(
     entry: dict[str, Any],
     users: dict[str, User],
-    hourly_rate: Optional[Fraction],
-    agency_rate: Optional[Fraction],
+    hourly_rate: Fraction | None,
+    agency_rate: Fraction | None,
 ) -> None:
     task_name = entry["task"]["name"]
     is_external = (
@@ -115,13 +115,13 @@ def process_entry(
 
 def aggregate_time_entries(
     entries: list[dict[str, Any]],
-    hourly_rate: Optional[Fraction],
-    agency_rate: Optional[Fraction],
+    hourly_rate: Fraction | None,
+    agency_rate: Fraction | None,
 ) -> dict[str, User]:
     users: dict[str, User] = defaultdict(User)
     for entry in entries:
         process_entry(entry, users, hourly_rate, agency_rate)
 
-    for _, user in users.items():
+    for user in users.values():
         user.sort()
     return OrderedDict(sorted(users.items()))

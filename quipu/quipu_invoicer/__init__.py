@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from pathlib import Path
 
 import click
 from quipu_api import QuipuAPI
@@ -54,8 +55,7 @@ def main(
     notes: str,
     json_file: str,
 ) -> None:
-    with open(json_file) as f:
-        tasks = json.load(f)
+    tasks = json.loads(Path(json_file).read_text())
 
     create_invoice(
         quipu_app_id,

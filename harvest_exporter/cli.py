@@ -6,7 +6,6 @@ import os
 import sys
 from datetime import date, datetime, timedelta
 from fractions import Fraction
-from typing import Tuple
 
 from harvest import get_time_entries
 
@@ -120,7 +119,7 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def get_month_range(year: int, month: int) -> Tuple[str, str]:
+def get_month_range(year: int, month: int) -> tuple[str, str]:
     """Get the start and end dates for a given month and year."""
     _, last_day = calendar.monthrange(year, month)
     start = date(year, month, 1).strftime("%Y%m%d")

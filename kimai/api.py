@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from kimai.data import (
     ActivityInfo,
@@ -19,8 +19,8 @@ class KimaiAPI:
     api_url: str
 
     def kimai_request(
-        self, endpoint: str, data: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, endpoint: str, data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         data["page"] = 1
         headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -42,14 +42,14 @@ class KimaiAPI:
 
         return all_entries
 
-    def get_visible_projects(self, billable: bool = False) -> List[Dict[str, Any]]:
+    def get_visible_projects(self, billable: bool = False) -> list[dict[str, Any]]:
         endpoint = "/api/projects"
         data = {
             "visible": 1,
         }
         return self.kimai_request(endpoint, data)
 
-    def get_visible_users(self) -> List[Dict[str, Any]]:
+    def get_visible_users(self) -> list[dict[str, Any]]:
         endpoint = "/api/users"
         data = {
             "visible": 1,
@@ -78,7 +78,7 @@ class KimaiAPI:
         user_id: int,
         customer_id: int,
         billable: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         endpoint = "/api/timesheets"
         data = {
             "user": user_id,

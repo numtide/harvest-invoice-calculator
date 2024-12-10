@@ -1,7 +1,7 @@
 import json
 from dataclasses import fields
 from fractions import Fraction
-from typing import Any, Type, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T", bound="JsonSerializable")
 
@@ -15,7 +15,7 @@ class JsonEncoder(json.JSONEncoder):
 
 class JsonSerializable:
     @classmethod
-    def from_json(cls: Type[T], data: dict) -> T:
+    def from_json(cls: type[T], data: dict) -> T:
         # Ensure cls is a dataclass
         if not hasattr(cls, "__dataclass_fields__"):
             raise TypeError(f"{cls.__name__} is not a dataclass")
@@ -36,7 +36,7 @@ class JsonSerializable:
         return cls(**filtered_data)
 
     @classmethod
-    def from_json_string(cls: Type[T], json_str: str) -> T:
+    def from_json_string(cls: type[T], json_str: str) -> T:
         # Parse the JSON string first
         data = json.loads(json_str)
 

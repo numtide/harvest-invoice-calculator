@@ -61,6 +61,9 @@
             };
           };
 
+          programs.ruff.format = true;
+          programs.ruff.check = true;
+
           settings.formatter = {
             nix = {
               command = "sh";
@@ -76,18 +79,6 @@
                 "--"
               ];
               includes = [ "*.nix" ];
-            };
-            python = {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
-                  ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
-                ''
-                "--" # this argument is ignored by bash
-              ];
-              includes = [ "*.py" ];
             };
           };
         };

@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 import click
-
 from quipu_api import QuipuAPI
 
 

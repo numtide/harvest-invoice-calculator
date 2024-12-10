@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import List, Optional, TypeVar
+from typing import Optional, TypeVar
 
 from kimai.jsonserializer import JsonSerializable
 
@@ -40,8 +40,8 @@ class CustomerInfo(JsonSerializable):
     email: Optional[str]
     homepage: Optional[str]
     timezone: str
-    metaFields: List
-    teams: List
+    metaFields: list
+    teams: list
     budget: float
     timeBudget: float
     budgetType: Optional[str]
@@ -59,8 +59,8 @@ class ProjectInfo(JsonSerializable):
     comment: Optional[str]
     visible: bool
     billable: bool
-    metaFields: List
-    teams: List
+    metaFields: list
+    teams: list
     globalActivities: bool
     number: str
     color: str
@@ -71,7 +71,7 @@ class TimeEntry(JsonSerializable):
     activity: int
     project: int
     user: int
-    tags: List
+    tags: list
     id: int
     begin: str
     end: str
@@ -81,7 +81,7 @@ class TimeEntry(JsonSerializable):
     internalRate: Fraction
     exported: bool
     billable: bool
-    metaFields: List
+    metaFields: list
 
 
 @dataclass
@@ -89,7 +89,7 @@ class TimeEntryFull(JsonSerializable):
     activity: int
     project: int
     user: int
-    tags: List
+    tags: list
     id: int
     begin: str
     end: str
@@ -100,7 +100,7 @@ class TimeEntryFull(JsonSerializable):
     internalRate: Fraction
     exported: bool
     billable: bool
-    metaFields: List
+    metaFields: list
 
 
 @dataclass
@@ -112,8 +112,8 @@ class ActivityInfo(JsonSerializable):
     comment: Optional[str]
     visible: bool
     billable: bool
-    metaFields: List
-    teams: List
+    metaFields: list
+    teams: list
     number: str
     budget: float
     timeBudget: float

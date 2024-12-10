@@ -1,7 +1,7 @@
+import argparse
 import json
 from decimal import Decimal
 from pathlib import Path
-import argparse
 
 
 def convert_to_decimal(value: str) -> Decimal:
@@ -78,7 +78,6 @@ def main() -> None:
             "Go to https://sevdesk.de/ and get the sum of all expenses: "
         )
     estimated_expenses = convert_to_decimal(estimated_expenses)
-
 
     calculated_tax = args.calculated_tax
     if not args.calculated_tax:

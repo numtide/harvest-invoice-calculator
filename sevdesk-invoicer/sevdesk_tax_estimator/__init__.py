@@ -88,6 +88,7 @@ def main() -> None:
 
     calculated_tax = args.calculated_tax
     if not args.calculated_tax:
+        print(f"Net income: {revenue - estimated_expenses:.2f}")
         calculated_tax = input(
             "Use https://www.bmf-steuerrechner.de/ to calculate remaining taxes, based on your net income: "
         )

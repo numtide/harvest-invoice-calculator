@@ -89,6 +89,15 @@ Exports the last month timesheets of user Jon for client Bob
 ./bin/kimai-exporter --client Bob --user Jon
 ```
 
+* German income tax estimator
+
+Calculates how much money still needs to be paid for the current year, given the current revenu, expenses and already payed pre-tax.
+
+```
+$ nix shell $HOME/git/harvest-invoice-calculator#sevdesk-invoicer -c sevdesk-tax-estimator --tax-office-name 'Finanzamt Berlin Finanzkasse' --harvest-folder 2024 --wise-folder statements/2024
+...
+Taxes left to pay: XXXXX.XX
+```
 
 ## API References
 

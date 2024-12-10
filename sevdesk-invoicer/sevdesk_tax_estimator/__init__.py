@@ -88,9 +88,9 @@ def main() -> None:
 
     calculated_tax = args.calculated_tax
     if not args.calculated_tax:
-        print(f"Net income: {revenue - estimated_expenses:.2f}")
+        print(f"Taxable net income: {revenue - estimated_expenses}")
         calculated_tax = input(
-            "Use https://www.bmf-steuerrechner.de/ to calculate remaining taxes, based on your net income: "
+            "Use https://www.bmf-steuerrechner.de/ to calculate remaining taxes, based on your taxable net income: "
         )
     calculated_tax = convert_to_decimal(calculated_tax)
 

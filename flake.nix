@@ -16,7 +16,7 @@
       imports = [
         inputs.treefmt-nix.flakeModule
       ];
-      perSystem = { config, pkgs, lib, ... }: {
+      perSystem = { config, pkgs, lib, self', ... }: {
         devShells.default = pkgs.callPackage ./shell.nix {
           treefmt = config.treefmt.build.wrapper;
         };
@@ -38,6 +38,14 @@
 
           default = config.packages.harvest-exporter;
         };
+
+        checks =
+          let
+            packages = lib.mapAttrs' (n: lib.nameValuePair "package-${n}") self'.packages;
+            devShells = lib.mapAttrs' (n: lib.nameValuePair "devShell-${n}") self'.devShells;
+          in
+          packages // devShells;
+
         treefmt = {
           # Used to find the project root
           projectRootFile = "flake.lock";

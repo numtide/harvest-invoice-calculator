@@ -1,5 +1,6 @@
 import json
 from dataclasses import fields
+from datetime import datetime
 from fractions import Fraction
 from typing import Any, TypeVar
 
@@ -49,6 +50,8 @@ class JsonSerializable:
         for key, value in self.__dict__.items():
             if isinstance(value, Fraction):
                 result[key] = round(float(value), 2)
+            elif isinstance(value, datetime):
+                result[key] = value.isoformat()
             else:
                 result[key] = value
         return result

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import urllib
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -11,6 +12,10 @@ from kimai.data import (
     UserInfo,
 )
 from rest import http_request2
+
+
+class KimaiError(Exception):
+    pass
 
 
 @dataclass
@@ -77,17 +82,23 @@ class KimaiAPI:
         to_date: datetime,
         user_id: int,
         customer_id: int,
+        project_id: int,
         billable: bool = True,
     ) -> list[dict[str, Any]]:
         endpoint = "/api/timesheets"
         data = {
             "user": user_id,
             "customer": customer_id,
+            "project": project_id,
             "begin": from_date.strftime("%Y-%m-%dT%H:%M:%S"),
             "end": to_date.strftime("%Y-%m-%dT%H:%M:%S"),
             "billable": int(billable),
         }
-        return self.kimai_request(endpoint, data)
+        try:
+            return self.kimai_request(endpoint, data)
+        except urllib.error.HTTPError as e:
+            msg = f"Failed to get time entries: {data}"
+            raise KimaiError(msg) from e
 
     def get_time_entry(self, entry_id: int) -> TimeEntryFull:
         endpoint = f"/api/timesheets/{entry_id}"

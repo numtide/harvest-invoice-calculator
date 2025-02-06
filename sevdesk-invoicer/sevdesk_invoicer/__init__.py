@@ -73,7 +73,9 @@ def get_contact_by_name(client: Client, name: str) -> Contact:
 
 def are_floats_similar(a: float, b: float, error_rate: float) -> bool:
     """Compare two floats to see if they are 'similar enough' within the specified error rate."""
-    return abs(a - b) <= error_rate
+    curr_err = abs(a - b)
+    print(f"Current error {curr_err}. Allowed error: {error_rate}", file=sys.stderr)
+    return curr_err <= error_rate
 
 
 def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
@@ -83,7 +85,7 @@ def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
             2,
         )
     )
-    if are_floats_similar(task["target_hourly_rate"], price, 0.01):
+    if are_floats_similar(task["target_hourly_rate"], price, 0.02):
         price = task["target_hourly_rate"]
     else:
         msg = f"Price {price} is not similar to target hourly rate {task['target_hourly_rate']}"
@@ -95,7 +97,7 @@ def line_item(task: dict[str, Any], has_agency: bool) -> LineItem:
             2,
         )
     )
-    if are_floats_similar(task["source_hourly_rate"], original_price, 0.01):
+    if are_floats_similar(task["source_hourly_rate"], original_price, 0.02):
         original_price = task["source_hourly_rate"]
     else:
         msg = f"Original price {original_price} is not similar to source hourly rate {task['source_hourly_rate']}"

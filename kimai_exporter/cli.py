@@ -5,13 +5,14 @@ import calendar
 import json
 import os
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from fractions import Fraction
 
 import kimai
 import kimai.api
 from harvest_exporter.transferwise import exchange_rate as get_exchange_rate
-from kimai.data import ProjectInfo, TimeEntry, UserInfo
+from kimai.data import JsonSerializable, ProjectInfo, TimeEntry, UserInfo
 from kimai.jsonserializer import JsonEncoder
 
 from . import ProjectReport
@@ -19,6 +20,13 @@ from . import ProjectReport
 
 class Error(Exception):
     pass
+
+
+def are_floats_similar(a: float, b: float, error_rate: float) -> bool:
+    """Compare two floats to see if they are 'similar enough' within the specified error rate."""
+    curr_err = abs(a - b)
+    # print(f"Current error {curr_err}. Allowed error: {error_rate}", file=sys.stderr)
+    return curr_err <= error_rate
 
 
 def parse_args() -> argparse.Namespace:
@@ -115,24 +123,36 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def main() -> None:
-    args = parse_args()
-    api = kimai.api.KimaiAPI(args.kimai_api_key, args.api_url)
+@dataclass
+class ReportOptions(JsonSerializable):
+    kimai_api_key: str
+    api_url: str
+    user: str
+    start: datetime
+    end: datetime
+    client: str
+    agency: str
+    currency: str
+
+
+def generate_report(options: ReportOptions) -> None:
+    api = kimai.api.KimaiAPI(options.kimai_api_key, options.api_url)
     projects = api.get_visible_projects()
 
     # Get user info
     users_data = api.get_visible_users()
     users_data = list(
         filter(
-            lambda user: user["username"] == args.user or user["alias"] == args.user,
+            lambda user: user["username"] == options.user
+            or user["alias"] == options.user,
             users_data,
         )
     )
     if len(users_data) < 1:
-        msg = f"User {args.user} not found"
+        msg = f"User {options.user} not found"
         raise Error(msg)
     if len(users_data) > 1:
-        msg = f"Multiple users found for {args.user}"
+        msg = f"Multiple users found for {options.user}"
         raise Error(msg)
     user = UserInfo.from_json(users_data[0])
 
@@ -140,46 +160,97 @@ def main() -> None:
     for project_data in projects:
         project = ProjectInfo.from_json(project_data)
         customer = api.get_customer(project.customer)
-        if customer.name != args.client:
+        print(
+            f"Project name: {project.name}. Customer name: {customer.name}",
+            file=sys.stderr,
+        )
+        if customer.name != options.client:
             continue
         total_seconds = Fraction(0)
         total_rate = Fraction(0)
         total_internal_rate = Fraction(0)
         tasks = set()
-
+        if project.name not in customer.name or customer.name not in project.name:
+            tasks.add(project.name)
         for entry_data in api.get_time_entries(
-            args.start, args.end, user.id, project.id
+            options.start, options.end, user.id, customer.id, project_id=project.id
         ):
             entry = TimeEntry.from_json(entry_data)
             activity = api.get_activity(entry.activity)
             tasks.add(activity.name)
             total_seconds += entry.duration
+
             total_rate += entry.rate
             total_internal_rate += entry.internalRate
 
         hourly_rate = api.get_time_entry(user.id).hourlyRate
 
-        rounded_hours = round(total_seconds / 60 / 60, 2)
-        exchange_rate = get_exchange_rate(customer.currency, args.currency)
+        rounded_hours = round(total_seconds / 60 / 60, 1)
+        orig_hours = total_seconds / 60 / 60
+        time_err = round(Fraction(orig_hours) - Fraction(rounded_hours), 4)
+        if time_err < 0:
+            print(f"Time lost: {float(time_err)} hours", file=sys.stderr)
+        elif time_err > 0:
+            print(f"Time gained: {float(time_err)} hours", file=sys.stderr)
+
+        exchange_rate = get_exchange_rate(customer.currency, options.currency)
         report = ProjectReport(
-            agency=args.agency,
+            agency=options.agency,
             client=customer.name,
-            end_date=args.end.strftime("%Y%m%d"),
+            end_date=options.end.strftime("%Y%m%d"),
             exchange_rate=float(exchange_rate),
             rounded_hours=rounded_hours,
-            source_cost=total_rate,
+            source_cost=rounded_hours * hourly_rate,
             source_currency=customer.currency,
             source_hourly_rate=hourly_rate,
-            start_date=args.start.strftime("%Y%m%d"),
-            target_cost=total_rate * exchange_rate,
-            target_currency=args.currency,
+            start_date=options.start.strftime("%Y%m%d"),
+            target_cost=rounded_hours * hourly_rate * exchange_rate,
+            target_currency=options.currency,
             target_hourly_rate=hourly_rate * exchange_rate,
-            task=",".join(tasks),
+            task=", ".join(tasks),
             user=user.alias,
         )
+
+        price = float(round(report.target_cost / report.rounded_hours, 2))
+
+        if not are_floats_similar(report.target_hourly_rate, price, 0.02):
+            msg = f"Price {price} is not similar to target hourly rate {report.target_hourly_rate}"
+            raise RuntimeError(msg)
+
+        original_price = float(
+            round(
+                (Fraction(report.source_cost) / Fraction(report.rounded_hours)),
+                2,
+            )
+        )
+
+        if not are_floats_similar(report.source_hourly_rate, original_price, 0.02):
+            msg = f"Original price {original_price} is not similar to source hourly rate {report.source_hourly_rate}"
+            raise RuntimeError(msg)
+
         all_reports.append(report)
 
     print(json.dumps(all_reports, indent=2, cls=JsonEncoder))
+
+
+def main() -> None:
+    args = parse_args()
+    options = ReportOptions(
+        kimai_api_key=args.kimai_api_key,
+        api_url=args.api_url,
+        user=args.user,
+        start=args.start,
+        end=args.end,
+        client=args.client,
+        agency=args.agency,
+        currency=args.currency,
+    )
+    try:
+        generate_report(options)
+    except Exception:
+        print(f"Failed to generate report for {options.client}", file=sys.stderr)
+        print(json.dumps(options, indent=2, cls=JsonEncoder), file=sys.stderr)
+        raise
 
 
 if __name__ == "__main__":

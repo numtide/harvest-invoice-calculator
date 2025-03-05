@@ -14,7 +14,7 @@ from typing import Any, NoReturn
 
 import rsa
 
-BASE_URL = " https://api.transferwise.com"
+BASE_URL = "https://api.transferwise.com"
 
 
 class Signer:
@@ -40,9 +40,12 @@ class Balance:
 
 
 class WiseClient:
-    def __init__(self, api_key: str, private_key: bytes) -> None:
+    def __init__(
+        self, api_key: str, private_key: bytes, pin: str | None = None
+    ) -> None:
         self.api_key = api_key
         self.signer = Signer(private_key)
+        self.pin: str | None = pin  # Store pin if provided
 
     def _http_request(
         self,
@@ -57,7 +60,10 @@ class WiseClient:
         if data:
             body = json.dumps(data).encode("ascii")
         headers = headers.copy()
-        req = urllib.request.Request(url, headers=headers, method=method, data=body)
+
+        req = urllib.request.Request(
+            f"{BASE_URL}/{url}", headers=headers, method=method, data=body
+        )
         resp = urllib.request.urlopen(req)
         return json.load(resp)
 
@@ -74,16 +80,156 @@ class WiseClient:
         headers["Content-Type"] = "application/json"
         headers["User-Agent"] = "Numtide wise importer"
         try:
-            return self._http_request(f"{BASE_URL}/{path}", method, headers, data)
+            return self._http_request(path, method, headers, data)
         except urllib.error.HTTPError as e:
             if e.code == 403 and "x-2fa-approval" in e.headers:
-                one_time_token = e.headers["x-2fa-approval"]
-                headers["x-2fa-approval"] = one_time_token
-                headers["X-Signature"] = self.signer.sca_challenge(one_time_token)
-                return self._http_request(f"{BASE_URL}/{path}", method, headers, data)
+                # Extract one-time token from the header
+                x_2fa_approval = e.headers["x-2fa-approval"].strip().split(" ")
+                one_time_token = x_2fa_approval[0]
+
+                # If challenge type is specified in header, use it (usually for signature)
+                explicit_challenge_type = None
+                if len(x_2fa_approval) >= 2:
+                    explicit_challenge_type = x_2fa_approval[1]
+
+                # Handle the 2FA challenge
+                self._handle_2fa_challenge(one_time_token, explicit_challenge_type)
+
+                # Retry the original request
+                return self._http_request(path, method, headers, data)
+            if e.code == 403:
+                print(f"URL: {e.url}", file=sys.stderr)
+                print(f"Headers: {e.headers}", file=sys.stderr)
+                die(
+                    "This API call needs 2FA. For more information, visit: https://docs.wise.com/api-docs/features/strong-customer-authentication-2fa"
+                )
+            elif e.code == 404:
+                msg = f"Not Found URL: {e.url}"
+                raise RuntimeError(msg) from e
+            else:
+                raise
+
+    def _get_token_status(self, one_time_token: str) -> dict[str, Any]:
+        """Get the status of a one-time token."""
+        headers = {"One-Time-Token": one_time_token}
+        result = self._http_request("v1/one-time-token/status", "GET", headers)
+        assert isinstance(result, dict)
+        return result
+
+    def _find_required_challenge(
+        self, token_status: dict[str, Any]
+    ) -> tuple[str | None, bool]:
+        """Find the required challenge from token status."""
+        challenges = token_status.get("oneTimeTokenProperties", {}).get(
+            "challenges", []
+        )
+
+        for challenge in challenges:
+            if challenge.get("required") and not challenge.get("passed"):
+                return challenge.get("primaryChallenge", {}).get("type"), True
+
+        return None, False
+
+    def _handle_2fa_challenge(
+        self, one_time_token: str, explicit_challenge_type: str | None = None
+    ) -> None:
+        """Handle 2FA challenge based on the token status or explicit type."""
+        try:
+            # If explicit challenge type is provided (like 'signature'), use it directly
+            if (
+                explicit_challenge_type
+                and explicit_challenge_type.upper() == "SIGNATURE"
+            ):
+                self._handle_signature_challenge(one_time_token)
+                return
+
+            # Otherwise, get token status to determine challenge type
+            token_status = self._get_token_status(one_time_token)
+            challenge_type, found = self._find_required_challenge(token_status)
+
+            if not found:
+                die("No pending challenge found for this request")
+
+            if challenge_type == "PIN":
+                self._handle_pin_challenge(one_time_token)
+            elif challenge_type == "SIGNATURE":
+                self._handle_signature_challenge(one_time_token)
+            elif challenge_type in ["SMS", "WHATSAPP", "VOICE"]:
+                self._handle_otp_challenge(one_time_token, challenge_type.lower())
+            else:
+                die(f"Unsupported challenge type: {challenge_type}")
+
+        except urllib.error.HTTPError as e:
+            print(f"Failed to process authentication challenge: {e.code} - {e.reason}")
             raise
 
-    def get_buisness_profile(self) -> int:
+    def _handle_signature_challenge(self, one_time_token: str) -> None:
+        """Handle signature verification challenge."""
+        # Generate signature using the Signer class
+        signature = self.signer.sca_challenge(one_time_token)
+
+        # No need to make an additional request for signature challenge
+        # The signature will be included in the header of the retried request
+        headers = {"One-Time-Token": one_time_token, "X-Signature": signature}
+
+        # Make a status check to verify the signature worked
+        try:
+            self._http_request("v1/one-time-token/status", "GET", headers)
+        except urllib.error.HTTPError as e:
+            die(f"Signature verification failed: {e.code} - {e.reason}")
+
+    def _handle_pin_challenge(self, one_time_token: str) -> None:
+        """Handle PIN verification challenge."""
+        if not self.pin:
+            self.pin = input("Enter your 4-digit PIN: ")
+
+        headers = {"One-Time-Token": one_time_token}
+
+        try:
+            self._http_request(
+                "v1/one-time-token/pin/verify", "POST", headers, {"pin": self.pin}
+            )
+            # Successfully verified
+        except urllib.error.HTTPError as e:
+            print(f"PIN verification failed: {e.code} - {e.reason}")
+            self.pin = None
+            die("PIN verification failed")
+
+    def _handle_otp_challenge(self, one_time_token: str, challenge_type: str) -> None:
+        """Handle OTP-based challenges (SMS, WhatsApp, Voice)."""
+        # Trigger the challenge
+        headers = {"One-Time-Token": one_time_token}
+
+        try:
+            # Trigger the challenge
+            trigger_data = self._http_request(
+                f"v1/one-time-token/{challenge_type}/trigger", "POST", headers
+            )
+
+            assert isinstance(trigger_data, dict)
+
+            print(
+                f"Challenge sent to {trigger_data.get('obfuscatedPhoneNo', 'your phone')}"
+            )
+
+            # Get OTP from user
+            otp_code = input(
+                f"Enter the one-time code sent to you via {challenge_type.upper()}: "
+            )
+
+            # Verify the challenge
+            self._http_request(
+                f"v1/one-time-token/{challenge_type}/verify",
+                "POST",
+                headers,
+                {"otpCode": otp_code},
+            )
+
+        except urllib.error.HTTPError as e:
+            print(f"Challenge verification failed: {e.code} - {e.reason}")
+            die(f"{challenge_type.upper()} verification failed")
+
+    def get_business_profile(self) -> int:
         r = self.http_request("/v2/profiles")
         assert isinstance(r, list)
         profiles = [p["id"] for p in r if p["type"] == "BUSINESS"]
@@ -109,8 +255,6 @@ class WiseClient:
         r = self.http_request(path)
         assert isinstance(r, dict)
         return r
-
-    # GET
 
 
 def die(msg: str) -> NoReturn:
@@ -145,6 +289,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=profile_id,
         help="Profile ID to use",
+    )
+    pin = os.environ.get("WISE_PIN")
+    parser.add_argument(
+        "--wise-pin",
+        default=pin,
+        help="Your 4-digit PIN for Wise, required for some 2FA challenges",
     )
     parser.add_argument(
         "--start",
@@ -210,9 +360,11 @@ ccount settings.
 def main() -> None:
     args = parse_args()
 
-    client = WiseClient(args.wise_api_token, args.wise_private_key.encode("ascii"))
+    client = WiseClient(
+        args.wise_api_token, args.wise_private_key.encode("ascii"), pin=args.wise_pin
+    )
     if not args.wise_profile:
-        args.wise_profile = client.get_buisness_profile()
+        args.wise_profile = client.get_business_profile()
     balances = client.get_balances(args.wise_profile)
     statement_per_account = []
     for balance in balances:
